@@ -30,7 +30,6 @@ h3{font-size:22px;margin:0 0 12px}
 .lnk{background:none;border:0;color:var(--ac);text-decoration:none;font:inherit;font-size:13.5px;font-weight:600;padding:6px 0;cursor:pointer}
 .lnk:hover{text-decoration:underline}
 
-/* Preu mitjà destacat */
 .avg-badge{
   display:inline-flex;align-items:center;gap:6px;background:var(--ac-bg);color:var(--ac);
   padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600;margin:8px 0 14px;border:1px solid var(--bd);
@@ -263,40 +262,67 @@ Crep de llimona|4.50
 Gelat de bola (vainilla, torró, xocolata...)|4.80`;
 
 const M=[];let cat;RAW.split("\n").forEach(l=>{if(l.includes("|")){const[n,p]=l.split("|");M.push({c:cat,n,p:+p,i:M.length})}else cat=l});
-const $=s=>document.querySelector(s),eur=v=>v.toFixed(2).replace(".",",")+" €",E=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]);
+const $=s=>document.querySelector(s),eur=v=>v.toFixed(2).replace(".",",")+" €",E=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const key=n=>n.trim().toLowerCase().replace(/\s+/g," ").replace(/[\/.#$\[\]]/g,""),nz=s=>key(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 const P=new URLSearchParams(location.search),AJ=P.has("ajuda"),ADM=P.has("admin");
 let q={},ok="",own="",nm="",tt;
 const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)||"";localStorage.setItem(k,v)}catch(e){return""}};
 
-// Escoltar l'evolució global de preus en temps real
+// Funció segura per calcular la mitjana del grup sense bloquejar la carta si falla
 function listenGroupAverage(){
-  db.onSnapshot(s=>{
-    const docs=s.docs.map(d=>d.data());
-    if(!docs.length){
-      $("#group-est").textContent="📊 Estimació grup: Sense comandes";
-      return;
-    }
-    const totFood=docs.reduce((acc,d)=>acc+(d.total||0),0);
-    const avgFood=totFood/docs.length;
-    const estTotal=avgFood+8; // 8€ estimats de beguda/extres per defecte
-    $("#group-est").textContent=`📊 Mitjana grup: ~${eur(estTotal)}/pers (${docs.length} comandes)`;
-  });
+  try {
+    db.onSnapshot(s=>{
+      const docs=s.docs.map(d=>d.data());
+      if(!docs.length){
+        $("#group-est").textContent="📊 Estimació grup: Encara sense comandes";
+        return;
+      }
+      const totFood=docs.reduce((acc,d)=>acc+(d.total||0),0);
+      const avgFood=totFood/docs.length;
+      const estTotal=avgFood+8;
+      $("#group-est").textContent=`📊 Mitjana grup: ~${eur(estTotal)}/pers (${docs.length} comandes)`;
+    }, err=>{
+      console.warn("No s'ha pogut carregar l'estimació global:", err);
+      $("#group-est").textContent="📊 Estimació grup: No disponible";
+    });
+  } catch(e) {
+    $("#group-est").textContent="📊 Estimació grup: No disponible";
+  }
 }
 
 function user(){
- listenGroupAverage();
- let h="",ch="",c="",k=0;
- M.forEach(m=>{if(m.c!=c){c=m.c;h+=`<h2 id="s${k}">${E(c)}</h2>`;ch+=`<a href="#s${k}">${E(c)}</a>`;k++}
-  h+=`<div class="it" data-i="${m.i}"><div class="n">${E(m.n)}<div class="p">${eur(m.p)}</div></div><span class="ck"></span></div>`});
- $("#menu").innerHTML=h;$("#nav").innerHTML=ch;
- $("#nav").onclick=e=>{const a=e.target.closest("a");if(!a)return;e.preventDefault();document.querySelector(a.getAttribute("href")).scrollIntoView({behavior:"smooth"})};
- $("#menu").onclick=e=>{const b=e.target.closest(".it");if(!b)return;const i=b.dataset.i;q[i]?delete q[i]:q[i]=1;paint()};
- $("#go").onclick=review;$("#rec").onclick=recoverUI;
- $("#ov").onclick=e=>{if(e.target.id==="ov")closeM()};document.onkeydown=e=>{if(e.key==="Escape")closeM()};
- if(AJ){$("#sub").textContent="Mode ajuda: fas la comanda d'una altra persona.";$("#rec").hidden=true;const n=P.get("nom");if(n){nm=n;own=key(n);fetchOrder(n)}}
- else{const n=ls("nom");if(n){nm=n;own=key(n);fetchOrder(n)}}
- paint()}
+  // Pinta la carta de manera immediata i independent
+  let h="",ch="",c="",k=0;
+  M.forEach(m=>{
+    if(m.c!=c){
+      c=m.c;
+      h+=`<h2 id="s${k}">${E(c)}</h2>`;
+      ch+=`<a href="#s${k}">${E(c)}</a>`;
+      k++;
+    }
+    h+=`<div class="it" data-i="${m.i}"><div class="n">${E(m.n)}<div class="p">${eur(m.p)}</div></div><span class="ck"></span></div>`;
+  });
+  $("#menu").innerHTML=h;
+  $("#nav").innerHTML=ch;
+  
+  $("#nav").onclick=e=>{const a=e.target.closest("a");if(!a)return;e.preventDefault();document.querySelector(a.getAttribute("href")).scrollIntoView({behavior:"smooth"})};
+  $("#menu").onclick=e=>{const b=e.target.closest(".it");if(!b)return;const i=b.dataset.i;q[i]?delete q[i]:q[i]=1;paint()};
+  $("#go").onclick=review;$("#rec").onclick=recoverUI;
+  $("#ov").onclick=e=>{if(e.target.id==="ov")closeM()};
+  document.onkeydown=e=>{if(e.key==="Escape")closeM()};
+
+  if(AJ){
+    $("#sub").textContent="Mode ajuda: fas la comanda d'una altra persona.";
+    $("#rec").hidden=true;
+    const n=P.get("nom");if(n){nm=n;own=key(n);fetchOrder(n)}
+  } else {
+    const n=ls("nom");if(n){nm=n;own=key(n);fetchOrder(n)}
+  }
+  paint();
+
+  // Activa la subscripció en segon pla
+  listenGroupAverage();
+}
 
 function paint(){let t=0;document.querySelectorAll(".it").forEach(el=>el.classList.toggle("on",!!q[el.dataset.i]));
  Object.entries(q).forEach(([i,v])=>{if(M[i])t+=v*M[i].p});const n=Object.keys(q).filter(i=>M[i]).length;
