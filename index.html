@@ -1,41 +1,58 @@
 <!DOCTYPE html>
 <html lang="ca"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#faf8f4">
 <title>Sopar de comiat · Comanda</title>
 <style>
-:root{--bg:#fffaf5;--fg:#2b2320;--card:#fff;--ac:#c2410c;--mu:#7c6f68;--bd:#eadfd6;--sel:#ffe7cf}
-@media(prefers-color-scheme:dark){:root{--bg:#1d1816;--fg:#f3ebe5;--card:#2a2320;--ac:#fb923c;--mu:#b3a59c;--bd:#40352f;--sel:#5a2e12}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px system-ui,sans-serif;padding:16px 14px 110px;max-width:640px;margin:auto}
-h1{font-size:22px;margin:4px 0}h2{font-size:17px;margin:22px 0 6px;color:var(--ac);position:sticky;top:0;background:var(--bg);padding:6px 0}
-p.s{color:var(--mu);margin:0 0 12px;font-size:14px}
-input{width:100%;padding:12px;border:1px solid var(--bd);border-radius:10px;font-size:16px;background:var(--card);color:var(--fg)}
-.it{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;margin:6px 0}
-.it .n{flex:1;font-size:15px}.it .p{color:var(--mu);font-size:13px;white-space:nowrap}
-.it{cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;padding:12px}
-.ck{width:30px;height:30px;flex:none;border:2px solid var(--bd);border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700}
-.it.on{background:var(--sel);box-shadow:0 0 0 2px var(--ac);border-color:var(--ac)}.it.on .n{font-weight:700}.it.on .ck{background:var(--ac);border-color:var(--ac)}
-#bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--bd);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:12px;align-items:center;justify-content:space-between}
-#bar button,.btn{background:var(--ac);color:#fff;border:0;border-radius:10px;padding:12px 18px;font-size:16px;font-weight:600}
-#msg{font-size:14px;color:var(--mu);margin-top:6px}
-table{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}td,th{padding:6px 4px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top}td.r,th.r{text-align:right;white-space:nowrap}
-.box{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin:12px 0}
-.big{font-size:26px;font-weight:700;color:var(--ac)}.row{display:flex;gap:10px}.row>*{flex:1}
+:root{--bg:#faf8f4;--fg:#1c1b19;--mu:#8a8378;--card:#fff;--bd:#ece7df;--ac:#1f4a3a;--on:#fff;--sel:#eaf2ed}
+@media(prefers-color-scheme:dark){:root{--bg:#141412;--fg:#f1eee8;--mu:#9a9387;--card:#1c1b19;--bd:#2c2a27;--ac:#7cc9a4;--on:#0d1a13;--sel:#1b2a23}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{overflow-x:clip;-webkit-text-size-adjust:100%}
+body{margin:0 auto;max-width:640px;padding:28px 16px 120px;background:var(--bg);color:var(--fg);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overflow-wrap:break-word}
+body.lock{overflow:hidden}
+.eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--mu)}
+h1,h2,h3{font-family:ui-serif,Georgia,"Times New Roman",serif;font-weight:600;letter-spacing:-.01em}
+h1{font-size:36px;line-height:1.1;margin:6px 0 8px}h2{font-size:22px;margin:30px 0 4px;scroll-margin-top:70px}h3{font-size:24px;margin:0 0 12px}
+.s{color:var(--mu);font-size:14px;margin:0 0 10px}a{color:var(--ac)}
+.lnk{background:none;border:0;color:var(--ac);text-decoration:underline;font:inherit;font-size:14px;padding:6px 0;cursor:pointer}
+#nav{position:sticky;top:0;z-index:20;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:10px 16px;background:var(--bg)}
+#nav::-webkit-scrollbar{display:none}
+#nav a{flex:none;padding:7px 14px;border:1px solid var(--bd);border-radius:999px;background:var(--card);color:var(--fg);font-size:14px;text-decoration:none;white-space:nowrap}
+.it{display:flex;align-items:center;gap:12px;padding:14px;margin:8px 0;background:var(--card);border:1px solid var(--bd);border-radius:14px;cursor:pointer;user-select:none;transition:background .15s,border-color .15s}
+.it .n{flex:1;min-width:0;font-size:15.5px}.it .p{color:var(--mu);font-size:13px;margin-top:2px;font-weight:400}
+.ck{width:26px;height:26px;flex:none;border:1.5px solid var(--bd);border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:700;color:var(--on)}
+.it.on{background:var(--sel);border-color:var(--ac)}.it.on .n{font-weight:600}.it.on .ck{background:var(--ac);border-color:var(--ac)}.it.on .ck::after{content:"✓"}
+#bar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px max(16px,calc((100vw - 640px)/2 + 16px)) calc(12px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:1px solid var(--bd)}
+#bar .s{margin:0}.big{font-size:22px;font-weight:700;color:var(--ac)}
+.btn{background:var(--ac);color:var(--on);border:0;border-radius:12px;padding:13px 20px;font:600 16px inherit;font-family:inherit;cursor:pointer}
+.btn:disabled{opacity:.4}.btn.ghost{background:none;color:var(--fg);border:1px solid var(--bd)}
+input{width:100%;padding:13px;border:1px solid var(--bd);border-radius:12px;font:inherit;font-size:16px;background:var(--card);color:var(--fg)}
+#ov{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}#ov[hidden]{display:none}
+#sh{width:100%;max-width:640px;max-height:88vh;overflow-y:auto;background:var(--bg);border-radius:22px 22px 0 0;padding:24px 18px calc(18px + env(safe-area-inset-bottom,0px));animation:up .25s ease}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+#sh .btn{display:block;width:100%;margin-top:10px}#sh label{display:block;font-size:13px;color:var(--mu);margin:10px 0 6px}
+.sum{list-style:none;margin:0;padding:0}.sum li{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--bd);font-size:15px}.sum b{font-weight:600;white-space:nowrap}
+.tl{display:flex;justify-content:space-between;padding:14px 0 6px;font-weight:700;font-size:17px}
+#err{color:#d1473d;font-size:14px;margin-top:8px}
+.ok{width:54px;height:54px;border-radius:50%;background:var(--ac);color:var(--on);display:grid;place-items:center;font-size:28px;margin-bottom:12px}
+#toast{position:fixed;left:50%;bottom:96px;transform:translate(-50%,10px);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90vw;text-align:center}#toast.show{opacity:1;transform:translate(-50%,0)}
+.box{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin:12px 0}.row{display:flex;gap:10px}.row>*{flex:1;min-width:0}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:8px 4px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top}td.r{text-align:right;white-space:nowrap}
 </style></head><body>
-<h1>🍽️ Sopar de comiat</h1>
-<p class="s">Escriu el teu nom, toca els plats que vols i prem «Desa». Pots tornar a entrar i canviar-ho fins a la data límit.</p>
+<header><div class="eyebrow">Hotel Montsoliu</div><h1>Sopar de comiat</h1>
+<p class="s" id="sub">Toca els plats que vols. Al final revisaràs la comanda i la desaràs amb el teu nom.</p></header>
 <div id="adm" hidden></div>
 <div id="usr">
-<input id="nom" placeholder="El teu nom i cognom" autocomplete="name">
-<div id="msg"></div>
-<div id="menu"></div>
-<div id="bar"><div><div style="font-size:12px;color:var(--mu)">El teu total (aprox.)</div><div class="big" id="tot">0,00 €</div></div><button id="sv">Desa la comanda</button></div>
+<button class="lnk" id="rec">Ja has fet la comanda? Recupera-la</button>
+<nav id="nav"></nav><div id="menu"></div>
+<div id="bar"><div><div class="s" id="cnt">0 plats</div><div class="big" id="tot">0,00 €</div></div><button class="btn" id="go" disabled>Revisa la comanda</button></div>
 </div>
+<div id="ov" hidden><div id="sh"><div id="shc"></div></div></div><div id="toast"></div>
+<script src="firebase-config.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-// 1) Enganxa aquí la configuració del teu projecte Firebase (Configuració del projecte → Les teves apps → Web)
-const FB={apiKey:"AIzaSyB4zT6L_M7wxoI6Rhf4KDnQJ7bZAtS6C4M",authDomain:"sopar-comiat.firebaseapp.com",projectId:"sopar-comiat",appId:"1:414416474783:web:9f397badf2d29e406388aa"};
-firebase.initializeApp(FB);const db=firebase.firestore().collection("sopar");
+firebase.initializeApp(window.FB_CONFIG);const db=firebase.firestore().collection("sopar");
 
 const RAW=`Per picar
 Braves|6.10
@@ -164,38 +181,65 @@ Crep de llimona|4.50
 Gelat de bola (vainilla, torró, xocolata...)|4.80`;
 const M=[];let cat;RAW.split("\n").forEach(l=>{if(l.includes("|")){const[n,p]=l.split("|");M.push({c:cat,n,p:+p,i:M.length})}else cat=l});
 const $=s=>document.querySelector(s),eur=v=>v.toFixed(2).replace(".",",")+" €",E=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const key=n=>n.trim().toLowerCase().replace(/\s+/g," ").replace(/[\/.#$\[\]]/g,"");
-let q={},ok="";const P=new URLSearchParams(location.search),AJ=P.has("ajuda");
-const nz=s=>key(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-
-if(location.search.includes("admin")){$("#usr").hidden=true;$("#adm").hidden=false;admin()}else user();
+const key=n=>n.trim().toLowerCase().replace(/\s+/g," ").replace(/[\/.#$\[\]]/g,""),nz=s=>key(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+const P=new URLSearchParams(location.search),AJ=P.has("ajuda"),ADM=P.has("admin");
+let q={},ok="",own="",nm="",tt;
+const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)||"";localStorage.setItem(k,v)}catch(e){return""}};
 
 function user(){
- let h="",c="";M.forEach(m=>{if(m.c!=c){c=m.c;h+=`<h2>${E(c)}</h2>`}
-  h+=`<div class="it" id="i${m.i}" data-i="${m.i}"><div class="n">${E(m.n)}<div class="p">${eur(m.p)}</div></div><span class="ck" id="q${m.i}"></span></div>`});
- $("#menu").innerHTML=h;
+ let h="",ch="",c="",k=0;
+ M.forEach(m=>{if(m.c!=c){c=m.c;h+=`<h2 id="s${k}">${E(c)}</h2>`;ch+=`<a href="#s${k}">${E(c)}</a>`;k++}
+  h+=`<div class="it" data-i="${m.i}"><div class="n">${E(m.n)}<div class="p">${eur(m.p)}</div></div><span class="ck"></span></div>`});
+ $("#menu").innerHTML=h;$("#nav").innerHTML=ch;
+ $("#nav").onclick=e=>{const a=e.target.closest("a");if(!a)return;e.preventDefault();document.querySelector(a.getAttribute("href")).scrollIntoView({behavior:"smooth"})};
  $("#menu").onclick=e=>{const b=e.target.closest(".it");if(!b)return;const i=b.dataset.i;q[i]?delete q[i]:q[i]=1;paint()};
- if(AJ){$(".s").textContent="Mode ajuda: fas la comanda d'una altra persona. Escriu-ne el nom, tria els plats i desa. Després pots fer-ne una altra.";$("#nom").placeholder="Nom de la persona"}
- $("#nom").value=AJ?(P.get("nom")||""):(localStorage.getItem("nom")||"");if($("#nom").value)load();
- $("#nom").onchange=load;$("#sv").onclick=save;
-}
-function paint(){let t=0;M.forEach(m=>{const v=q[m.i]||0;$("#q"+m.i).textContent=v?"✓":"";$("#i"+m.i).classList.toggle("on",v>0);t+=v*m.p});$("#tot").textContent=eur(t)}
+ $("#go").onclick=review;$("#rec").onclick=recoverUI;
+ $("#ov").onclick=e=>{if(e.target.id==="ov")closeM()};document.onkeydown=e=>{if(e.key==="Escape")closeM()};
+ if(AJ){$("#sub").textContent="Mode ajuda: fas la comanda d'una altra persona.";$("#rec").hidden=true;const n=P.get("nom");if(n){nm=n;own=key(n);fetchOrder(n)}}
+ else{const n=ls("nom");if(n){nm=n;own=key(n);fetchOrder(n)}}
+ paint()}
+function paint(){let t=0;document.querySelectorAll(".it").forEach(el=>el.classList.toggle("on",!!q[el.dataset.i]));
+ Object.entries(q).forEach(([i,v])=>{if(M[i])t+=v*M[i].p});const n=Object.keys(q).filter(i=>M[i]).length;
+ $("#cnt").textContent=n+(n==1?" plat":" plats");$("#tot").textContent=eur(t);$("#go").disabled=!n}
+function total(){let t=0;Object.entries(q).forEach(([i,v])=>{if(M[i])t+=v*M[i].p});return t}
+function toast(m){const x=$("#toast");x.textContent=m;x.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>x.classList.remove("show"),3500)}
+function sheet(h){$("#shc").innerHTML=h;$("#ov").hidden=false;document.body.classList.add("lock")}
+function closeM(){$("#ov").hidden=true;document.body.classList.remove("lock")}
+function err(m){const x=$("#err");if(x)x.textContent=m}
+function fill(d){q={};Object.entries(d.items||{}).forEach(([k,v])=>q[k]=v)}
+function summary(){const ids=Object.keys(q).filter(i=>M[i]).sort((a,b)=>a-b);
+ return`<ul class="sum">${ids.map(i=>`<li><span>${E(M[i].n)}</span><b>${eur(M[i].p*q[i])}</b></li>`).join("")}</ul><div class="tl"><span>Total aproximat</span><span>${eur(total())}</span></div>`}
 async function names(){return(await db.get()).docs.map(d=>d.data().name)}
-async function sim(n){const k=key(n);if(ok&&k.startsWith(ok))return[];const b=nz(n),bf=b.split(" ")[0];
+async function sim(n){const b=nz(n),bf=b.split(" ")[0];
  return(await names()).filter(x=>{const a=nz(x);return a.split(" ")[0]===bf||(b.length>1&&a.startsWith(b))||(a.length>1&&b.startsWith(a))})}
-function ask(n,L){const m=$("#msg");m.innerHTML="Ja hi ha comandes amb un nom semblant. Ets tu?<br>"+L.map((x,i)=>`<button class="btn" style="margin:6px 6px 0 0" data-s="${i}">Sí, sóc ${E(x)}</button>`).join("")+`<button class="btn" id="no" style="margin-top:6px;background:none;color:var(--ac);border:1px solid var(--ac)">No, sóc una altra persona</button>`;
- m.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{$("#nom").value=L[b.dataset.s];load()});
- $("#no").onclick=()=>{ok=key(n);m.textContent="Perfecte. Afegeix-hi el cognom si cal i desa la comanda."}}
-async function load(){const n=$("#nom").value.trim();if(!n)return;if(!AJ)try{localStorage.setItem("nom",n)}catch(e){}
- try{const d=await db.doc(key(n)).get();q={};
-  if(d.exists){Object.entries(d.data().items||{}).forEach(([k,v])=>q[k]=v);$("#msg").textContent="✓ He recuperat la comanda. Pots modificar-la i tornar a desar."}
-  else{$("#msg").textContent="";const L=await sim(n);if(L.length)ask(n,L)}
-  paint()}catch(e){$("#msg").textContent="No puc connectar amb la base de dades."}}
-async function save(){const n=$("#nom").value.trim();if(!n){$("#msg").textContent="Escriu primer el teu nom.";$("#nom").focus();return}
- let t=0;Object.entries(q).forEach(([i,v])=>t+=v*M[i].p);
- try{if(!(await db.doc(key(n)).get()).exists){const L=await sim(n);if(L.length){ask(n,L);return}}
-  await db.doc(key(n)).set({name:n,items:q,total:t,ts:Date.now()});if(!AJ)try{localStorage.setItem("nom",n)}catch(e){}
-  $("#msg").innerHTML="✅ <b>Comanda desada!</b> Total aproximat: "+eur(t)+". Si vols canviar-la, torna a entrar amb el mateix nom."+(AJ?" Pots fer la comanda següent.":"");if(AJ){q={};$("#nom").value="";ok="";paint()}}catch(e){$("#msg").textContent="⚠️ No s'ha pogut desar. Torna-ho a provar."}}
+async function fetchOrder(n){try{const d=await db.doc(key(n)).get();if(d.exists){fill(d.data());paint();toast(AJ?"Comanda carregada: pots modificar-la.":"Hola, "+n.split(" ")[0]+"! He recuperat la teva comanda.")}}catch(e){}}
+
+function review(){if(!Object.keys(q).length)return;
+ sheet(`<h3>Revisa la teva comanda</h3>${summary()}<label for="nm2">${AJ?"Nom de la persona":"El teu nom"}</label><input id="nm2" placeholder="Nom i cognom" autocomplete="name" value="${E(nm)}"><div id="err"></div><button class="btn" id="ok">Confirma la comanda</button><button class="btn ghost" id="bk">Torna a la carta</button>`);
+ $("#bk").onclick=closeM;$("#ok").onclick=()=>save($("#nm2").value.trim());if(!nm)$("#nm2").focus()}
+async function save(n){
+ if(!n){err("Escriu el teu nom per poder desar la comanda.");const i=$("#nm2");if(i)i.focus();return}
+ if(!Object.keys(q).length){err("Tria almenys un plat.");return}
+ const b=$("#ok");if(b){b.disabled=true;b.textContent="Desant…"}
+ try{const k=key(n);
+  if(k!==own){const ex=(await db.doc(k).get()).exists;let L=await sim(n);if(!ex&&ok&&k.startsWith(ok))L=[];if(L.length){conflict(n,L);return}}
+  await db.doc(k).set({name:n,items:q,total:total(),ts:Date.now()});
+  own=k;nm=n;if(!AJ)ls("nom",n);done()
+ }catch(e){const b2=$("#ok");if(b2){b2.disabled=false;b2.textContent="Confirma la comanda"}err("No s'ha pogut desar. Revisa la connexió i torna-ho a provar.")}}
+function conflict(n,L){const k=key(n),ex=L.some(x=>key(x)===k);
+ sheet(`<h3>${ex?"Aquest nom ja té una comanda":"Ja hi ha un nom semblant"}</h3><p class="s">${ex?"Ja hi ha una comanda a nom de «"+E(n)+"». És teva?":"Ja hi ha comandes amb un nom semblant. Ets tu?"} Si ho ets, la comanda anterior es substituirà per aquesta.</p>`+L.map((x,i)=>`<button class="btn ghost" data-s="${i}">Sí, sóc ${E(x)}</button>`).join("")+`<button class="btn" id="no">No, sóc una altra persona</button>`);
+ $("#shc").querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{own=key(L[b.dataset.s]);save(L[b.dataset.s])});
+ $("#no").onclick=()=>{ok=k;nm=n;review();err("Afegeix-hi el cognom o una inicial (per exemple «"+n.split(" ")[0]+" P.») i confirma.")}}
+function done(){sheet(`<div class="ok">✓</div><h3>Comanda desada</h3><p class="s">Revisa que sigui correcta. Si vols canviar alguna cosa, toca «Modifica la comanda».</p>${summary()}<button class="btn" id="fin">${AJ?"Següent persona":"Fet"}</button><button class="btn ghost" id="mod">Modifica la comanda</button>`);
+ $("#mod").onclick=closeM;$("#fin").onclick=()=>{if(AJ){q={};nm="";own="";ok="";paint();scrollTo(0,0)}closeM()}}
+function recoverUI(){sheet(`<h3>Recupera la teva comanda</h3><p class="s">Escriu el nom amb què vas fer la comanda.</p><input id="nm3" placeholder="Nom i cognom" value="${E(nm)}"><div id="err"></div><button class="btn" id="rc">Recupera</button><button class="btn ghost" id="bk">Tanca</button>`);
+ $("#bk").onclick=closeM;$("#rc").onclick=()=>recover($("#nm3").value.trim())}
+async function recover(n){if(!n){err("Escriu el nom.");return}
+ try{const d=await db.doc(key(n)).get();
+  if(d.exists){fill(d.data());own=key(n);nm=d.data().name;ls("nom",nm);paint();closeM();toast("Comanda recuperada. Pots modificar-la i tornar a desar.")}
+  else{const L=await sim(n);$("#err").innerHTML="No trobo cap comanda amb aquest nom."+(L.length?" Potser ets:<br>"+L.map((x,i)=>`<button class="btn ghost" data-r="${i}">${E(x)}</button>`).join(""):"");
+   $("#err").querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>recover(L[b.dataset.r]))}
+ }catch(e){err("No puc connectar amb la base de dades.")}}
 
 function admin(){
  $("#adm").innerHTML=`<div class="box"><div class="row"><div>Comensals<input id="np" type="number" min="1"></div><div>Begudes i extres per persona (€)<input id="bg" type="number" min="0" value="8"></div></div>
@@ -215,4 +259,6 @@ function admin(){
  $("#tq").onclick=e=>{const a=e.target.closest("[data-del]");if(!a)return;e.preventDefault();const n=a.dataset.del;if(confirm("Esborrar la comanda de "+n+"?"))db.doc(key(n)).delete()};
  $("#cp").onclick=()=>navigator.clipboard.writeText(window._txt||"").then(()=>$("#cp").textContent="Copiat ✓");
 }
+
+if(ADM){$("#usr").hidden=true;$("#adm").hidden=false;$("#sub").textContent="Panell d'administració";admin()}else user();
 </script></body></html>
