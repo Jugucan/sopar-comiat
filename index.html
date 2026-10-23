@@ -3,8 +3,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#faf8f4">
 <title>Sopar de comiat · Comanda</title>
-<!-- Lucide Icons & Fonts -->
-<script src="https://unpkg.com/lucide@latest"></script>
 <style>
 :root{
   --bg:#f8f6f0;--fg:#1c1b18;--mu:#787268;--card:#ffffff;--bd:#e6e1d7;
@@ -42,7 +40,6 @@ h3{font-size:20px}
   padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600;margin:8px 0 14px;border:1px solid var(--bd);
 }
 
-/* Nav i llista */
 #nav{position:sticky;top:0;z-index:20;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:10px 16px;background:var(--bg)}
 #nav::-webkit-scrollbar{display:none}
 #nav a{
@@ -346,7 +343,7 @@ function paint(){let t=0;document.querySelectorAll(".it").forEach(el=>el.classLi
  $("#cnt").textContent=n+(n==1?" plat":" plats");$("#tot").textContent=eur(t);$("#go").disabled=!n}
 function total(){let t=0;Object.entries(q).forEach(([i,v])=>{if(M[i])t+=v*M[i].p});return t}
 function toast(m){const x=$("#toast");x.textContent=m;x.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>x.classList.remove("show"),3500)}
-function sheet(h){$("#shc").innerHTML=h;$("#ov").hidden=false;document.body.classList.add("lock");if(window.lucide)lucide.createIcons()}
+function sheet(h){$("#shc").innerHTML=h;$("#ov").hidden=false;document.body.classList.add("lock")}
 function closeM(){$("#ov").hidden=true;document.body.classList.remove("lock")}
 function err(m){const x=$("#err");if(x)x.textContent=m}
 function fill(d){q={};Object.entries(d.items||{}).forEach(([k,v])=>q[k]=v)}
@@ -384,7 +381,7 @@ async function recover(n){if(!n){err("Escriu el nom.");return}
    $("#err").querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>recover(L[b.dataset.r]))}
  }catch(e){err("No puc connectar amb la base de dades.")}}
 
-// LÒGICA D'ADMINISTRACIÓ ESTIL LOVABLE
+// LÒGICA D'ADMINISTRACIÓ ESTIL LOVABLE SENSE DEPENDÈNCIES EXTERNES
 function admin(){
  document.body.classList.add("admin-mode");
  $("#main-title").textContent="Gestió del sopar";
@@ -394,8 +391,8 @@ function admin(){
  $("#adm").innerHTML=`
   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
     <div style="display:flex;gap:8px;">
-      <button class="btn ghost sm" id="btn-summary"><i data-lucide="clipboard-copy" style="width:14px;height:14px"></i> Copia el resum per al restaurant</button>
-      <a class="btn sm" href="?ajuda"><i data-lucide="plus" style="width:14px;height:14px"></i> Comanda d'una altra persona</a>
+      <button class="btn ghost sm" id="btn-summary">📋 Copia el resum per al restaurant</button>
+      <a class="btn sm" href="?ajuda">➕ Comanda d'una altra persona</a>
     </div>
   </div>
 
@@ -414,8 +411,7 @@ function admin(){
           <button id="v-persona">Per persona</button>
         </div>
         <div style="position:relative;flex:1;max-width:280px;">
-          <input id="adm-search" placeholder="Cerca plat o comensal..." style="padding-left:32px;">
-          <i data-lucide="search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--mu)"></i>
+          <input id="adm-search" placeholder="🔍 Cerca plat o comensal..." style="padding-left:12px;">
         </div>
       </div>
 
@@ -469,7 +465,6 @@ function admin(){
   $("#st-perperson").textContent = docs.length ? eur((totalFood / guestsCount) + extrasCost) : "—";
   $("#st-extras").textContent = `menjar + ${eur(extrasCost)} extres`;
 
-  // Pills de categories
   const categories = [...new Set(M.map(m=>m.c))];
   let pillsHTML = `<button class="pill ${currentCat===''?'active':''}" data-cat="">Totes</button>`;
   categories.forEach(c=>{
@@ -504,7 +499,7 @@ function admin(){
               <div style="font-weight:600;font-size:15px">${E(d.dish.n)}</div>
               <div class="s" style="margin:0">${E(d.dish.c)} · ${eur(d.dish.p)}</div>
             </div>
-            <i data-lucide="${isOpen?'chevron-up':'chevron-down'}" style="width:18px;height:18px;color:var(--mu)"></i>
+            <div style="color:var(--mu);font-size:12px;">${isOpen?'▲':'▼'}</div>
           </div>
           ${isOpen ? `
             <div class="dish-people">
@@ -543,7 +538,7 @@ function admin(){
               <div class="s" style="margin:0">${items.length} plats</div>
             </div>
             <div style="font-weight:700;margin-right:8px">${eur(d.total||0)}</div>
-            <i data-lucide="${isOpen?'chevron-up':'chevron-down'}" style="width:18px;height:18px;color:var(--mu)"></i>
+            <div style="color:var(--mu);font-size:12px;">${isOpen?'▲':'▼'}</div>
           </div>
           ${isOpen ? `
             <div class="dish-people">
@@ -554,8 +549,8 @@ function admin(){
                 </div>
               `).join("")}
               <div style="display:flex;gap:8px;margin-top:10px;">
-                <a class="btn ghost sm" href="?ajuda&nom=${encodeURIComponent(d.name)}"><i data-lucide="pencil" style="width:12px;height:12px"></i> Edita</a>
-                <button class="btn danger sm" data-del-person="${E(d.name)}"><i data-lucide="trash-2" style="width:12px;height:12px"></i> Esborra</button>
+                <a class="btn ghost sm" href="?ajuda&nom=${encodeURIComponent(d.name)}">✏️ Edita</a>
+                <button class="btn danger sm" data-del-person="${E(d.name)}">🗑️ Esborra</button>
               </div>
             </div>
           ` : ''}
@@ -564,8 +559,6 @@ function admin(){
     });
     listEl.innerHTML = h;
   }
-
-  if(window.lucide) lucide.createIcons();
  }
 
  $("#v-plat").onclick = () => { currentView="plat"; $("#v-plat").classList.add("active"); $("#v-persona").classList.remove("active"); renderAdmin(); };
