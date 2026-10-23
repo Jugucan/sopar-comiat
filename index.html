@@ -1,16 +1,19 @@
 <!DOCTYPE html>
-<html lang="ca"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#faf8f4">
+<html lang="ca">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#faf8f4">
+  
+  <!-- Títol de la pestanya del navegador -->
+  <title>Sopar Smile Team · Hotel Montsoliu</title>
+  
+  <!-- Vista prèvia per a WhatsApp i xarxes socials -->
+  <meta property="og:title" content="Sopar Smile Team">
+  <meta property="og:description" content="Tria els teus plats per al sopar a l'Hotel Montsoliu i confirma la comanda.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
 
-<!-- Títol de la pestanya del navegador -->
-<title>Sopar Smile Team · Hotel Montsoliu</title>
-
-<!-- Vista prèvia per a WhatsApp i xarxes socials -->
-<meta property="og:title" content="Sopar Smile Team">
-<meta property="og:description" content="Tria els teus plats per al sopar a l'Hotel Montsoliu i confirma la comanda.">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary">
 <style>
 :root{
   --bg:#faf8f4;--fg:#1c1b18;--mu:#787268;--card:#ffffff;--bd:#e6e1d7;
@@ -128,6 +131,8 @@ input:focus{border-color:var(--ac)}
 #err{color:var(--danger);font-size:13.5px;margin-top:8px}
 .ok{width:50px;height:50px;border-radius:50%;background:var(--ac);color:var(--on);display:grid;place-items:center;font-size:24px;margin-bottom:12px}
 
+.obs-tag{background:#fef3c7;color:#92400e;padding:6px 10px;border-radius:8px;font-size:12.5px;margin-top:6px;display:block}
+
 .stats-grid{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
   gap:10px;margin:16px 0;padding:12px 0;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);
@@ -191,7 +196,7 @@ input:focus{border-color:var(--ac)}
   <div id="menu"></div>
   <div id="bar">
     <div>
-      <div class="s" id="cnt">0 plats seleccionats</div>
+      <div class="s" id="cnt">0 plats triats</div>
       <div class="big" id="tot">Est. mitjana: —</div>
     </div>
     <button class="btn" id="go" disabled>Revisa la comanda</button>
@@ -344,26 +349,36 @@ const $=s=>document.querySelector(s),eur=v=>v.toFixed(2).replace(".",",")+" €"
 const key=n=>n.trim().toLowerCase().replace(/\s+/g," ").replace(/[\/.#$\[\]]/g,""),nz=s=>key(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 const P=new URLSearchParams(location.search),AJ=P.has("ajuda"),ADM=P.has("admin");
 let q={},ok="",own="",nm="",tt,cachedDocs=[];
+let currentExtrasCost = 8;
 const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)||"";localStorage.setItem(k,v)}catch(e){return""}};
 
 function currentAverageCost(){
-  if(!cachedDocs.length) return 0;
-  const totFood = cachedDocs.reduce((acc,d)=>acc+(d.total||0),0);
-  return (totFood / cachedDocs.length) + 8;
+  const orderDocs = cachedDocs.filter(d => !d.isConfig);
+  if(!orderDocs.length) return 0;
+  const totFood = orderDocs.reduce((acc,d)=>acc+(d.total||0),0);
+  return (totFood / orderDocs.length) + currentExtrasCost;
 }
 
 function listenGroupAverage(){
   try {
     db.onSnapshot(s=>{
       cachedDocs = s.docs.map(d=>d.data());
+      
+      const configDoc = cachedDocs.find(d => d.isConfig === true);
+      if(configDoc && typeof configDoc.extras === "number"){
+        currentExtrasCost = configDoc.extras;
+      }
+
+      const orderDocs = cachedDocs.filter(d => !d.isConfig);
       const estTotal = currentAverageCost();
-      if(!cachedDocs.length){
+
+      if(!orderDocs.length){
         $("#est-amount-val").textContent = "—";
         $("#est-sub-val").textContent = "0 comandes";
         $("#tot").textContent = "Est. mitjana: —";
       } else {
         $("#est-amount-val").textContent = eur(estTotal);
-        $("#est-sub-val").textContent = `${cachedDocs.length} comandes`;
+        $("#est-sub-val").textContent = `${orderDocs.length} comandes`;
         $("#tot").textContent = `Est. mitjana: ${eur(estTotal)}`;
       }
     }, err=>{
@@ -460,13 +475,27 @@ async function fetchOrder(n){
 
 function review(){
   if(!Object.keys(q).length)return;
-  sheet(`<h3>Revisa la teva comanda</h3>${summary()}<label for="nm2">${AJ?"Nom de la persona":"El teu nom i cognom"}</label><input id="nm2" placeholder="Nom i cognom" autocomplete="name" value="${E(nm)}"><div id="err"></div><button class="btn" id="ok">Confirma la comanda</button><button class="btn ghost" id="bk">Torna a la carta</button>`);
+  const currentObs = (cachedDocs.find(d => key(d.name || "") === own) || {}).obs || "";
+
+  sheet(`
+    <h3>Revisa la teva comanda</h3>
+    ${summary()}
+    <label for="nm2">${AJ?"Nom de la persona":"El teu nom i cognom"}</label>
+    <input id="nm2" placeholder="Nom i cognom" autocomplete="name" value="${E(nm)}">
+    
+    <label for="obs2">Al·lèrgies, intoleràncies o observacions (opcional)</label>
+    <input id="obs2" placeholder="Ex: Intolerant al gluten, sense ceba..." value="${E(currentObs)}">
+
+    <div id="err"></div>
+    <button class="btn" id="ok">Confirma la comanda</button>
+    <button class="btn ghost" id="bk">Torna a la carta</button>
+  `);
   $("#bk").onclick=closeM;
-  $("#ok").onclick=()=>save($("#nm2").value.trim());
+  $("#ok").onclick=()=>save($("#nm2").value.trim(), $("#obs2").value.trim());
   if(!nm)$("#nm2").focus();
 }
 
-async function save(n){
+async function save(n, obs=""){
  if(!n){err("Escriu el teu nom per poder desar la comanda.");const i=$("#nm2");if(i)i.focus();return}
  if(!Object.keys(q).length){err("Tria almenys un plat.");return}
  const b=$("#ok");if(b){b.disabled=true;b.textContent="Desant…"}
@@ -476,9 +505,9 @@ async function save(n){
     const ex=(await db.doc(k).get()).exists;
     let L=await sim(n);
     if(!ex&&ok&&k.startsWith(ok))L=[];
-    if(L.length){conflict(n,L);return}
+    if(L.length){conflict(n,L,obs);return}
   }
-  await db.doc(k).set({name:n,items:q,total:total(),ts:Date.now()});
+  await db.doc(k).set({name:n, items:q, total:total(), obs:obs, ts:Date.now()});
   own=k;nm=n;if(!AJ)ls("nom",n);
   done();
  }catch(e){
@@ -487,10 +516,10 @@ async function save(n){
  }
 }
 
-function conflict(n,L){
+function conflict(n,L,obs){
   const k=key(n),ex=L.some(x=>key(x)===k);
   sheet(`<h3>${ex?"Aquest nom ja té una comanda":"Ja hi ha un nom semblant"}</h3><p class="s">${ex?"Ja hi ha una comanda a nom de «"+E(n)+"». És teva?":"Ja hi ha comandes amb un nom semblant. Ets tu?"} Si ho ets, la comanda anterior es substituirà per aquesta.</p>`+L.map((x,i)=>`<button class="btn ghost" data-s="${i}">Sí, sóc ${E(x)}</button>`).join("")+`<button class="btn" id="no">No, sóc una altra persona</button>`);
-  $("#shc").querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{own=key(L[b.dataset.s]);save(L[b.dataset.s])});
+  $("#shc").querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{own=key(L[b.dataset.s]);save(L[b.dataset.s], obs)});
   $("#no").onclick=()=>{ok=k;nm=n;review();err("Afegeix-hi el cognom o una inicial (per exemple «"+n.split(" ")[0]+" P.») i confirma.")}
 }
 
@@ -522,16 +551,18 @@ async function recover(n){
 }
 
 function showEstimateSheet(){
-  const count = cachedDocs.length;
-  const estTotal = currentAverageCost();
-  const avgFood = count ? (cachedDocs.reduce((acc,d)=>acc+(d.total||0),0) / count) : 0;
+  const orderDocs = cachedDocs.filter(d => !d.isConfig);
+  const count = orderDocs.length;
+  const totFood = orderDocs.reduce((acc,d)=>acc+(d.total||0),0);
+  const avgFood = count ? (totFood / count) : 0;
+  const estTotal = avgFood + currentExtrasCost;
 
   sheet(`
     <h3>Com va el sopar?</h3>
     <div style="background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin:12px 0;">
       <div class="s" style="margin:0">Estimació mitjana per persona</div>
       <div style="font-family:ui-serif,Georgia,serif;font-size:36px;font-weight:700;color:var(--ac);margin:4px 0">${count ? eur(estTotal) : "—"}</div>
-      <div class="s" style="margin:0">${count ? eur(avgFood) : "0,00 €"} menjar + 8,00 € beguda/extres</div>
+      <div class="s" style="margin:0">${count ? eur(avgFood) : "0,00 €"} menjar + ${eur(currentExtrasCost)} beguda/extres</div>
     </div>
     <p class="s">Basat en les <b>${count} comandes</b> rebudes fins ara.</p>
     <button class="btn ghost" id="close-est">Torna a la carta</button>
@@ -539,7 +570,7 @@ function showEstimateSheet(){
   $("#close-est").onclick = closeM;
 }
 
-// ADMIN LOVABLE (Al panell d'administrador es continuen veient els preus per gestionar la despesa global)
+// ADMIN LOVABLE
 function admin(){
  document.body.classList.add("admin-mode");
  $("#main-title").textContent="Gestió del sopar";
@@ -579,11 +610,10 @@ function admin(){
 
     <aside style="display:flex;flex-direction:column;gap:16px;">
       <div style="background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;box-shadow:var(--shadow)">
-        <h3 style="font-size:14px;margin-bottom:12px;">Configuració</h3>
-        <label style="font-size:12px;color:var(--mu);display:block;margin-bottom:4px;">Total de comensals</label>
-        <input id="cfg-guests" type="number" min="1" value="1" style="margin-bottom:10px;">
+        <h3 style="font-size:14px;margin-bottom:12px;">Configuració del grup</h3>
+        <p style="font-size:12px;color:var(--mu);margin-bottom:10px;">Comensals que han demanat: <b style="color:var(--fg);" id="cfg-guests-val">0</b></p>
         <label style="font-size:12px;color:var(--mu);display:block;margin-bottom:4px;">Begudes i extres / persona (€)</label>
-        <input id="cfg-extras" type="number" min="0" value="8" step="0.5">
+        <input id="cfg-extras" type="number" min="0" value="${currentExtrasCost}" step="0.5">
       </div>
     </aside>
   </div>
@@ -598,8 +628,9 @@ function admin(){
 
  function renderAdmin(){
   let totalFood = 0, servingsCount = 0, dishStats = {};
+  const orderDocs = docs.filter(d => !d.isConfig);
 
-  docs.forEach(d=>{
+  orderDocs.forEach(d=>{
     const items = d.items||{};
     Object.entries(items).forEach(([i,v])=>{
       if(M[i]){
@@ -612,15 +643,16 @@ function admin(){
     });
   });
 
-  const guestsCount = +$("#cfg-guests").value || docs.length || 1;
-  const extrasCost = +$("#cfg-extras").value || 0;
+  const guestsCount = orderDocs.length || 1;
+  const extrasCost = currentExtrasCost;
 
-  $("#st-people").textContent = docs.length;
+  $("#st-people").textContent = orderDocs.length;
   $("#st-guests").textContent = `de ${guestsCount} comensals`;
+  $("#cfg-guests-val").textContent = orderDocs.length;
   $("#st-servings").textContent = servingsCount;
   $("#st-dishes").textContent = `${Object.keys(dishStats).length} plats diferents`;
   $("#st-food").textContent = eur(totalFood);
-  $("#st-perperson").textContent = docs.length ? eur((totalFood / guestsCount) + extrasCost) : "—";
+  $("#st-perperson").textContent = orderDocs.length ? eur((totalFood / guestsCount) + extrasCost) : "—";
   $("#st-extras").textContent = `menjar + ${eur(extrasCost)} extres`;
 
   const categories = [...new Set(M.map(m=>m.c))];
@@ -675,7 +707,7 @@ function admin(){
     listEl.innerHTML = h;
 
   } else {
-    let filteredPeople = docs.filter(d => !qStr || nz(d.name).includes(qStr));
+    let filteredPeople = orderDocs.filter(d => !qStr || nz(d.name).includes(qStr));
     if(!filteredPeople.length){
       listEl.innerHTML = `<p class="s" style="text-align:center;padding:20px;">Cap comensal trobat.</p>`;
       return;
@@ -694,6 +726,7 @@ function admin(){
             <div style="flex:1;min-width:0">
               <div style="font-weight:600;font-size:15px">${E(d.name)}</div>
               <div class="s" style="margin:0">${items.length} plats</div>
+              ${d.obs ? `<div class="obs-tag">⚠️ ${E(d.obs)}</div>` : ''}
             </div>
             <div style="font-weight:700;margin-right:8px">${eur(d.total||0)}</div>
             <div style="color:var(--mu);font-size:12px;">${isOpen?'▲':'▼'}</div>
@@ -722,7 +755,12 @@ function admin(){
  $("#v-plat").onclick = () => { currentView="plat"; $("#v-plat").classList.add("active"); $("#v-persona").classList.remove("active"); renderAdmin(); };
  $("#v-persona").onclick = () => { currentView="persona"; $("#v-persona").classList.add("active"); $("#v-plat").classList.remove("active"); renderAdmin(); };
  $("#adm-search").oninput = (e) => { searchQuery = e.target.value; renderAdmin(); };
- $("#cfg-guests").oninput = $("#cfg-extras").oninput = renderAdmin;
+
+ $("#cfg-extras").onchange = (e) => {
+   const val = parseFloat(e.target.value) || 0;
+   currentExtrasCost = val;
+   db.doc("_config_sopar").set({ isConfig: true, extras: val }, { merge: true });
+ };
 
  $("#cat-pills").onclick = (e) => {
    const btn = e.target.closest(".pill");
@@ -756,7 +794,9 @@ function admin(){
  $("#btn-summary").onclick = () => {
    let txt = "RESUM PER AL RESTAURANT\n\n";
    let cnt = {};
-   docs.forEach(d=>Object.entries(d.items||{}).forEach(([i,v])=>{ if(M[i]) cnt[i]=(cnt[i]||0)+v; }));
+   const orderDocs = docs.filter(d => !d.isConfig);
+
+   orderDocs.forEach(d=>Object.entries(d.items||{}).forEach(([i,v])=>{ if(M[i]) cnt[i]=(cnt[i]||0)+v; }));
    
    const categories = [...new Set(M.map(m=>m.c))];
    
@@ -772,12 +812,25 @@ function admin(){
      }
    });
 
-   navigator.clipboard.writeText(txt.trim()).then(()=>toast("Resum organitzat copiat al porta-retalls ✓"));
+   const obsList = orderDocs.filter(d => d.obs && d.obs.trim() !== "");
+   if(obsList.length > 0){
+     txt += "⚠️ AL·LÈRGIES I OBSERVACIONS:\n";
+     obsList.forEach(d => {
+       txt += `• ${d.name}: ${d.obs.trim()}\n`;
+     });
+   }
+
+   navigator.clipboard.writeText(txt.trim()).then(()=>toast("Resum organitzat amb al·lèrgies copiat ✓"));
  };
 
  db.orderBy("name").onSnapshot(s => {
    docs = s.docs.map(d=>d.data());
-   if(!$("#cfg-guests").value || $("#cfg-guests").value == 1) $("#cfg-guests").value = docs.length || 1;
+   const cfg = docs.find(d => d.isConfig);
+   if(cfg && typeof cfg.extras === "number"){
+     currentExtrasCost = cfg.extras;
+     const inputExt = $("#cfg-extras");
+     if(inputExt && document.activeElement !== inputExt) inputExt.value = currentExtrasCost;
+   }
    renderAdmin();
  });
 }
