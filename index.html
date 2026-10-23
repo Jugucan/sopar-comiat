@@ -251,9 +251,10 @@ function admin(){
   const n=+np.value||docs.length||1,b=+$("#bg").value||0;
   $("#pp").textContent=eur(tot/n+b);$("#det").textContent=`Menjar ${eur(tot)} ÷ ${n} persones + ${eur(b)} begudes · ${docs.length} comandes rebudes`;
   const ids=Object.keys(cnt).sort((a,b)=>a-b);
-  $("#tp").innerHTML="<table>"+ids.map(i=>`<tr><td><b>${cnt[i]}×</b> ${E(M[i].n)}</td><td class="r">${eur(cnt[i]*M[i].p)}</td></tr>`).join("")+"</table>";
-  $("#tq").innerHTML="<table>"+docs.map(d=>`<tr><td><b>${E(d.name)}</b><br>${Object.entries(d.items||{}).filter(([i])=>M[i]).map(([i,v])=>(v>1?v+"× ":"")+E(M[i].n)).join("<br>")}</td><td class="r">${eur(d.total||0)}<br><a href="?ajuda&nom=${encodeURIComponent(d.name)}">Edita</a> · <a href="#" data-del="${E(d.name)}">Esborra</a></td></tr>`).join("")+"</table>";
-  window._txt="PER PLAT\n"+ids.map(i=>`${cnt[i]}x ${M[i].n}`).join("\n")+"\n\nPER PERSONA\n"+docs.map(d=>d.name+": "+Object.entries(d.items||{}).filter(([i])=>M[i]).map(([i,v])=>v+"x "+M[i].n).join("; ")).join("\n")};
+  const cats=[...new Set(M.map(m=>m.c))],G=a=>cats.map(c=>[c,a.filter(i=>M[i].c===c)]).filter(x=>x[1].length),its=d=>Object.keys(d.items||{}).filter(i=>M[i]);
+  $("#tp").innerHTML="<table>"+G(ids).map(([c,l])=>`<tr><th colspan="2" style="padding-top:18px;color:var(--ac)">${E(c)} · ${l.reduce((s,i)=>s+cnt[i],0)}</th></tr>`+l.map(i=>`<tr><td><b>${cnt[i]}×</b> ${E(M[i].n)}</td><td class="r">${eur(cnt[i]*M[i].p)}</td></tr>`).join("")).join("")+"</table>";
+  $("#tq").innerHTML="<table>"+docs.map(d=>`<tr><td><b>${E(d.name)}</b>${G(its(d)).map(([c,l])=>`<div class="s" style="margin:8px 0 0">${E(c)}</div>`+l.map(i=>`<div>${(d.items[i]>1?d.items[i]+"× ":"")+E(M[i].n)}</div>`).join("")).join("")}</td><td class="r">${eur(d.total||0)}<br><a href="?ajuda&nom=${encodeURIComponent(d.name)}">Edita</a> · <a href="#" data-del="${E(d.name)}">Esborra</a></td></tr>`).join("")+"</table>";
+  window._txt="PER PLAT\n"+G(ids).map(([c,l])=>c.toUpperCase()+"\n"+l.map(i=>`${cnt[i]}x ${M[i].n}`).join("\n")).join("\n\n")+"\n\nPER PERSONA\n"+docs.map(d=>d.name+": "+its(d).map(i=>d.items[i]+"x "+M[i].n).join("; ")).join("\n")};
  np.oninput=$("#bg").oninput=draw;
  db.orderBy("name").onSnapshot(s=>{docs=s.docs.map(d=>d.data());if(!np.value)np.value=docs.length;draw()});
  $("#tq").onclick=e=>{const a=e.target.closest("[data-del]");if(!a)return;e.preventDefault();const n=a.dataset.del;if(confirm("Esborrar la comanda de "+n+"?"))db.doc(key(n)).delete()};
