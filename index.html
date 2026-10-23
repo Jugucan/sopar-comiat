@@ -7,7 +7,7 @@
 :root{--bg:#faf8f4;--fg:#1c1b19;--mu:#8a8378;--card:#fff;--bd:#ece7df;--ac:#1f4a3a;--on:#fff;--sel:#eaf2ed}
 @media(prefers-color-scheme:dark){:root{--bg:#141412;--fg:#f1eee8;--mu:#9a9387;--card:#1c1b19;--bd:#2c2a27;--ac:#7cc9a4;--on:#0d1a13;--sel:#1b2a23}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{overflow-x:clip;-webkit-text-size-adjust:100%}
+html{overflow-x:hidden;overflow-x:clip;max-width:100%;-webkit-text-size-adjust:100%}
 body{margin:0 auto;max-width:640px;padding:28px 16px 120px;background:var(--bg);color:var(--fg);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overflow-wrap:break-word}
 body.lock{overflow:hidden}
 .eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--mu)}
@@ -37,7 +37,7 @@ input{width:100%;padding:13px;border:1px solid var(--bd);border-radius:12px;font
 .ok{width:54px;height:54px;border-radius:50%;background:var(--ac);color:var(--on);display:grid;place-items:center;font-size:28px;margin-bottom:12px}
 #toast{position:fixed;left:50%;bottom:96px;transform:translate(-50%,10px);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90vw;text-align:center}#toast.show{opacity:1;transform:translate(-50%,0)}
 .box{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin:12px 0}.row{display:flex;gap:10px}.row>*{flex:1;min-width:0}
-table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:8px 4px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top}td.r{text-align:right;white-space:nowrap}
+table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:14px}td,th{padding:8px 4px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top;overflow-wrap:anywhere}td.r{width:98px;text-align:right}
 </style></head><body>
 <header><div class="eyebrow">Hotel Montsoliu</div><h1>Sopar de comiat</h1>
 <p class="s" id="sub">Toca els plats que vols. Al final revisaràs la comanda i la desaràs amb el teu nom.</p></header>
