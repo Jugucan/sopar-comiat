@@ -38,6 +38,189 @@ input{width:100%;padding:13px;border:1px solid var(--bd);border-radius:12px;font
 #toast{position:fixed;left:50%;bottom:96px;transform:translate(-50%,10px);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90vw;text-align:center}#toast.show{opacity:1;transform:translate(-50%,0)}
 .box{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin:12px 0}.row{display:flex;gap:10px}.row>*{flex:1;min-width:0}
 table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:14px}td,th{padding:8px 4px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top;overflow-wrap:anywhere}td.r{width:98px;text-align:right}
+
+/* Millora visual · Hotel Montsoliu */
+:root {
+  --bg: #f7f5f0;
+  --fg: #242923;
+  --mu: #777d73;
+  --card: #ffffff;
+  --bd: #e7e5dc;
+  --ac: #315b46;
+  --on: #ffffff;
+  --sel: #eaf1eb;
+}
+
+body {
+  max-width: 760px;
+  padding: 32px 20px 132px;
+  line-height: 1.5;
+}
+
+header {
+  padding: 12px 0 20px;
+}
+
+.eyebrow {
+  letter-spacing: .16em;
+  font-size: 11px;
+}
+
+h1 {
+  font-size: clamp(36px, 8vw, 48px);
+  line-height: 1.08;
+  margin: 12px 0;
+  letter-spacing: -.035em;
+}
+
+h2 {
+  font-size: 25px;
+  margin: 34px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--bd);
+}
+
+#nav {
+  margin: 0 -20px;
+  padding: 12px 20px;
+  gap: 8px;
+}
+
+#nav a {
+  padding: 9px 15px;
+  border-radius: 999px;
+  transition: background .2s, border-color .2s;
+}
+
+#nav a:hover {
+  border-color: var(--ac);
+  background: var(--sel);
+}
+
+.it {
+  gap: 14px;
+  padding: 16px;
+  margin: 9px 0;
+  border-radius: 16px;
+  transition: transform .15s, box-shadow .15s,
+    background .15s, border-color .15s;
+}
+
+.it:active {
+  transform: scale(.99);
+}
+
+.it.on {
+  background: var(--sel);
+  border-color: var(--ac);
+  box-shadow: 0 2px 8px rgba(49, 91, 70, .07);
+}
+
+.it .n {
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.it .p {
+  margin-top: 5px;
+}
+
+.ck {
+  width: 28px;
+  height: 28px;
+}
+
+.est {
+  padding: 17px;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(36, 41, 35, .035);
+}
+
+.big {
+  font-size: 24px;
+  letter-spacing: -.025em;
+}
+
+#bar {
+  padding-top: 14px;
+  padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -5px 24px rgba(36, 41, 35, .045);
+}
+
+.btn {
+  border-radius: 12px;
+  padding: 14px 19px;
+  transition: opacity .2s, transform .15s;
+}
+
+.btn:not(:disabled):active {
+  transform: scale(.98);
+}
+
+input {
+  border-radius: 12px;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--ac);
+  box-shadow: 0 0 0 3px rgba(49, 91, 70, .10);
+}
+
+#sh {
+  border-radius: 24px 24px 0 0;
+  padding: 28px 22px calc(22px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, .08);
+}
+
+.box {
+  padding: 18px;
+  border-radius: 16px;
+}
+
+.tabs {
+  border-radius: 14px;
+}
+
+.tabs button {
+  border-radius: 10px;
+  padding: 12px 8px;
+}
+
+.sum li {
+  padding: 12px 0;
+}
+
+@media (min-width: 680px) {
+  body {
+    padding-top: 44px;
+  }
+
+  #menu {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 14px;
+    align-items: start;
+  }
+
+  #menu h2 {
+    grid-column: 1 / -1;
+  }
+
+  .it {
+    margin: 5px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+
 </style></head><body>
 <header><div class="eyebrow">Hotel Montsoliu</div><h1>Sopar de comiat</h1>
 <p class="s" id="sub">Toca els plats que vols. Al final revisaràs la comanda i la desaràs amb el teu nom.</p></header>
