@@ -457,7 +457,11 @@ function summary(){
   <div class="tl"><span>Estimació mitjana del grup</span><span>${avg ? eur(avg) : "—"}</span></div>`;
 }
 
-async function names(){return(await db.get()).docs.map(d=>d.data().name)}
+async function names(){
+  const s = await db.get();
+  return s.docs.map(d=>d.data()).filter(d=>!d.isConfig && d.name).map(d=>d.name);
+}
+
 async function sim(n){
   const b=nz(n),bf=b.split(" ")[0];
   return(await names()).filter(x=>{const a=nz(x);return a.split(" ")[0]===bf||(b.length>1&&a.startsWith(b))||(a.length>1&&b.startsWith(a))})
@@ -465,7 +469,9 @@ async function sim(n){
 
 async function fetchOrder(n){
   try{
-    const d=await db.doc(key(n)).get();
+    const k = key(n);
+    if(!k) return;
+    const d=await db.doc(k).get();
     if(d.exists){
       fill(d.data());paint();
       toast(AJ?"Comanda carregada: pots modificar-la.":"Hola, "+n.split(" ")[0]+"! He recuperat la teva comanda.");
@@ -498,16 +504,17 @@ function review(){
 async function save(n, obs=""){
  if(!n){err("Escriu el teu nom per poder desar la comanda.");const i=$("#nm2");if(i)i.focus();return}
  if(!Object.keys(q).length){err("Tria almenys un plat.");return}
+ const k=key(n);
+ if(!k){err("El nom utilitzat no és vàlid.");return}
  const b=$("#ok");if(b){b.disabled=true;b.textContent="Desant…"}
  try{
-  const k=key(n);
   if(k!==own){
     const ex=(await db.doc(k).get()).exists;
     let L=await sim(n);
     if(!ex&&ok&&k.startsWith(ok))L=[];
     if(L.length){conflict(n,L,obs);return}
   }
-  await db.doc(k).set({name:n, items:q, total:total(), obs:obs, ts:Date.now()});
+  await db.doc(k).set({name:n, items:q, total:total(), obs:obs, ts:Date.now(), isConfig:false});
   own=k;nm=n;if(!AJ)ls("nom",n);
   done();
  }catch(e){
@@ -537,10 +544,12 @@ function recoverUI(){
 
 async function recover(n){
   if(!n){err("Escriu el nom.");return}
+  const k=key(n);
+  if(!k){err("El nom introduït no és vàlid.");return}
   try{
-    const d=await db.doc(key(n)).get();
-    if(d.exists){
-      fill(d.data());own=key(n);nm=d.data().name;ls("nom",nm);paint();closeM();
+    const d=await db.doc(k).get();
+    if(d.exists && !d.data().isConfig){
+      fill(d.data());own=k;nm=d.data().name;ls("nom",nm);paint();closeM();
       toast("Comanda recuperada. Pots modificar-la i tornar a desar.");
     } else {
       const L=await sim(n);
@@ -759,7 +768,7 @@ function admin(){
  $("#cfg-extras").onchange = (e) => {
    const val = parseFloat(e.target.value) || 0;
    currentExtrasCost = val;
-   db.doc("_config_sopar").set({ isConfig: true, extras: val }, { merge: true });
+   db.doc("z_config_sopar").set({ isConfig: true, extras: val }, { merge: true });
  };
 
  $("#cat-pills").onclick = (e) => {
@@ -787,7 +796,8 @@ function admin(){
    const delBtn = e.target.closest("[data-del-person]");
    if(delBtn){
      const name = delBtn.dataset.delPerson;
-     if(confirm("Esborrar la comanda de "+name+"?")) db.doc(key(name)).delete();
+     const k = key(name);
+     if(k && confirm("Esborrar la comanda de "+name+"?")) db.doc(k).delete();
    }
  };
 
@@ -823,7 +833,7 @@ function admin(){
    navigator.clipboard.writeText(txt.trim()).then(()=>toast("Resum organitzat amb al·lèrgies copiat ✓"));
  };
 
- db.orderBy("name").onSnapshot(s => {
+ db.onSnapshot(s => {
    docs = s.docs.map(d=>d.data());
    const cfg = docs.find(d => d.isConfig);
    if(cfg && typeof cfg.extras === "number"){
