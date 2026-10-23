@@ -4,55 +4,137 @@
 <meta name="theme-color" content="#faf8f4">
 <title>Sopar de comiat · Comanda</title>
 <style>
-:root{--bg:#faf8f4;--fg:#1c1b19;--mu:#8a8378;--card:#fff;--bd:#ece7df;--ac:#1f4a3a;--on:#fff;--sel:#eaf2ed}
-@media(prefers-color-scheme:dark){:root{--bg:#141412;--fg:#f1eee8;--mu:#9a9387;--card:#1c1b19;--bd:#2c2a27;--ac:#7cc9a4;--on:#0d1a13;--sel:#1b2a23}}
+:root{
+  --bg:#f8f6f0;--fg:#1c1b18;--mu:#787268;--card:#ffffff;--bd:#e6e1d7;
+  --ac:#2d5a45;--ac-bg:#edf4f0;--on:#ffffff;--sel:#f0f7f2;--shadow:0 4px 20px rgba(0,0,0,0.05);
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#121210;--fg:#f0ece1;--mu:#9e978b;--card:#1a1a18;--bd:#2e2c28;
+    --ac:#62c396;--ac-bg:#162b21;--on:#0a1711;--sel:#182b22;--shadow:0 4px 20px rgba(0,0,0,0.3);
+  }
+}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{overflow-x:hidden;overflow-x:clip;max-width:100%;-webkit-text-size-adjust:100%}
-body{margin:0 auto;max-width:640px;padding:28px 16px 120px;background:var(--bg);color:var(--fg);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overflow-wrap:break-word}
+body{
+  margin:0 auto;max-width:640px;padding:24px 16px 120px;background:var(--bg);color:var(--fg);
+  font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overflow-wrap:break-word;
+}
 body.lock{overflow:hidden}
-.eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--mu)}
-h1,h2,h3{font-family:ui-serif,Georgia,"Times New Roman",serif;font-weight:600;letter-spacing:-.01em}
-h1{font-size:36px;line-height:1.1;margin:6px 0 8px}h2{font-size:22px;margin:30px 0 4px;scroll-margin-top:70px}h3{font-size:24px;margin:0 0 12px}
-.s{color:var(--mu);font-size:14px;margin:0 0 10px}a{color:var(--ac)}
-.lnk{background:none;border:0;color:var(--ac);text-decoration:underline;font:inherit;font-size:14px;padding:6px 0;cursor:pointer}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--mu)}
+h1,h2,h3{font-family:ui-serif,Georgia,serif;font-weight:600;letter-spacing:-.01em}
+h1{font-size:32px;line-height:1.15;margin:4px 0 8px}
+h2{font-size:20px;margin:28px 0 10px;scroll-margin-top:70px;border-bottom:1px solid var(--bd);padding-bottom:6px}
+h3{font-size:22px;margin:0 0 12px}
+.s{color:var(--mu);font-size:13.5px;margin:0 0 10px}
+.lnk{background:none;border:0;color:var(--ac);text-decoration:none;font:inherit;font-size:13.5px;font-weight:600;padding:6px 0;cursor:pointer}
+.lnk:hover{text-decoration:underline}
+
+/* Preu mitjà destacat */
+.avg-badge{
+  display:inline-flex;align-items:center;gap:6px;background:var(--ac-bg);color:var(--ac);
+  padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600;margin:8px 0 14px;border:1px solid var(--bd);
+}
+
 #nav{position:sticky;top:0;z-index:20;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:10px 16px;background:var(--bg)}
 #nav::-webkit-scrollbar{display:none}
-#nav a{flex:none;padding:7px 14px;border:1px solid var(--bd);border-radius:999px;background:var(--card);color:var(--fg);font-size:14px;text-decoration:none;white-space:nowrap}
-.it{display:flex;align-items:center;gap:12px;padding:14px;margin:8px 0;background:var(--card);border:1px solid var(--bd);border-radius:14px;cursor:pointer;user-select:none;transition:background .15s,border-color .15s}
-.it .n{flex:1;min-width:0;font-size:15.5px}.it .p{color:var(--mu);font-size:13px;margin-top:2px;font-weight:400}
-.ck{width:26px;height:26px;flex:none;border:1.5px solid var(--bd);border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:700;color:var(--on)}
+#nav a{
+  flex:none;padding:7px 14px;border:1px solid var(--bd);border-radius:999px;background:var(--card);
+  color:var(--fg);font-size:13.5px;font-weight:500;text-decoration:none;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.02);
+}
+
+.it{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;margin:8px 0;background:var(--card);
+  border:1px solid var(--bd);border-radius:14px;cursor:pointer;user-select:none;transition:all .15s ease;box-shadow:var(--shadow);
+}
+.it .n{flex:1;min-width:0;font-size:15px;line-height:1.3}.it .p{color:var(--mu);font-size:13px;margin-top:2px;font-weight:500}
+.ck{width:24px;height:24px;flex:none;border:1.5px solid var(--bd);border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--on)}
 .it.on{background:var(--sel);border-color:var(--ac)}.it.on .n{font-weight:600}.it.on .ck{background:var(--ac);border-color:var(--ac)}.it.on .ck::after{content:"✓"}
-#bar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px max(16px,calc((100vw - 640px)/2 + 16px)) calc(12px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:1px solid var(--bd)}
-#bar .s{margin:0}.big{font-size:22px;font-weight:700;color:var(--ac)}
-.btn{background:var(--ac);color:var(--on);border:0;border-radius:12px;padding:13px 20px;font:600 16px inherit;font-family:inherit;cursor:pointer}
-.btn:disabled{opacity:.4}.btn.ghost{background:none;color:var(--fg);border:1px solid var(--bd)}
-input{width:100%;padding:13px;border:1px solid var(--bd);border-radius:12px;font:inherit;font-size:16px;background:var(--card);color:var(--fg)}
-#ov{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}#ov[hidden]{display:none}
-#sh{width:100%;max-width:640px;max-height:88vh;overflow-y:auto;background:var(--bg);border-radius:22px 22px 0 0;padding:24px 18px calc(18px + env(safe-area-inset-bottom,0px));animation:up .25s ease}
-@keyframes up{from{transform:translateY(40px);opacity:0}}
-#sh .btn{display:block;width:100%;margin-top:10px}#sh label{display:block;font-size:13px;color:var(--mu);margin:10px 0 6px}
-.sum{list-style:none;margin:0;padding:0}.sum li{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--bd);font-size:15px}.sum b{font-weight:600;white-space:nowrap}
-.tl{display:flex;justify-content:space-between;padding:14px 0 6px;font-weight:700;font-size:17px}
-#err{color:#d1473d;font-size:14px;margin-top:8px}
-.ok{width:54px;height:54px;border-radius:50%;background:var(--ac);color:var(--on);display:grid;place-items:center;font-size:28px;margin-bottom:12px}
-#toast{position:fixed;left:50%;bottom:96px;transform:translate(-50%,10px);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90vw;text-align:center}#toast.show{opacity:1;transform:translate(-50%,0)}
-.box{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin:12px 0}.row{display:flex;gap:10px}.row>*{flex:1;min-width:0}
-table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:14px}td,th{padding:8px 4px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top;overflow-wrap:anywhere}td.r{width:98px;text-align:right}
+
+#bar{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;align-items:center;justify-content:space-between;
+  gap:12px;padding:12px max(16px,calc((100vw - 640px)/2 + 16px)) calc(12px + env(safe-area-inset-bottom,0px));
+  background:var(--card);border-top:1px solid var(--bd);box-shadow:0 -4px 20px rgba(0,0,0,0.05);
+}
+#bar .s{margin:0}.big{font-size:20px;font-weight:700;color:var(--ac)}
+.btn{
+  background:var(--ac);color:var(--on);border:0;border-radius:12px;padding:12px 18px;
+  font:600 15px inherit;font-family:inherit;cursor:pointer;transition:opacity .15s;
+}
+.btn:active{opacity:.85}.btn:disabled{opacity:.4}
+.btn.ghost{background:none;color:var(--fg);border:1px solid var(--bd)}
+
+input{
+  width:100%;padding:12px 14px;border:1px solid var(--bd);border-radius:12px;
+  font:inherit;font-size:15px;background:var(--card);color:var(--fg);outline:none;
+}
+input:focus{border-color:var(--ac)}
+
+#ov{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center}
+#ov[hidden]{display:none}
+#sh{
+  width:100%;max-width:640px;max-height:88vh;overflow-y:auto;background:var(--bg);
+  border-radius:20px 20px 0 0;padding:22px 18px calc(18px + env(safe-area-inset-bottom,0px));
+  animation:up .22s ease-out;box-shadow:0 -10px 30px rgba(0,0,0,0.15);
+}
+@keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+#sh .btn{display:block;width:100%;margin-top:10px}
+#sh label{display:block;font-size:13px;font-weight:600;color:var(--mu);margin:12px 0 6px}
+
+.sum{list-style:none;margin:0;padding:0}
+.sum li{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--bd);font-size:14.5px}
+.sum b{font-weight:600;white-space:nowrap}
+.tl{display:flex;justify-content:space-between;padding:14px 0 6px;font-weight:700;font-size:16px}
+#err{color:#d1473d;font-size:13.5px;margin-top:8px}
+.ok{width:50px;height:50px;border-radius:50%;background:var(--ac);color:var(--on);display:grid;place-items:center;font-size:24px;margin-bottom:12px}
+
+#toast{
+  position:fixed;left:50%;bottom:92px;transform:translate(-50%,10px);background:var(--fg);
+  color:var(--bg);padding:10px 18px;border-radius:999px;font-size:13.5px;font-weight:500;
+  opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90vw;text-align:center;box-shadow:0 4px 15px rgba(0,0,0,0.2);
+}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+.box{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin:12px 0;box-shadow:var(--shadow)}
+.row{display:flex;gap:12px}.row>*{flex:1;min-width:0}
+
+table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:14px}
+td,th{padding:10px 6px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top;overflow-wrap:anywhere}
+td.r{width:90px;text-align:right}
+.people-tag{font-size:12.5px;color:var(--mu);margin-top:3px;line-height:1.3}
 </style></head><body>
-<header><div class="eyebrow">Hotel Montsoliu</div><h1>Sopar de comiat</h1>
-<p class="s" id="sub">Toca els plats que vols. Al final revisaràs la comanda i la desaràs amb el teu nom.</p></header>
+
+<header>
+  <div class="eyebrow">Hotel Montsoliu</div>
+  <h1>Sopar de comiat</h1>
+  <p class="s" id="sub">Toca els plats que vols. Al final revisaràs la comanda i la desaràs amb el teu nom.</p>
+  <div class="avg-badge" id="group-est">📊 Estimació grup: Calculant…</div>
+</header>
+
 <div id="adm" hidden></div>
+
 <div id="usr">
-<button class="lnk" id="rec">Ja has fet la comanda? Recupera-la</button>
-<nav id="nav"></nav><div id="menu"></div>
-<div id="bar"><div><div class="s" id="cnt">0 plats</div><div class="big" id="tot">0,00 €</div></div><button class="btn" id="go" disabled>Revisa la comanda</button></div>
+  <button class="lnk" id="rec">Ja has fet la comanda? Recupera-la</button>
+  <nav id="nav"></nav>
+  <div id="menu"></div>
+  <div id="bar">
+    <div>
+      <div class="s" id="cnt">0 plats</div>
+      <div class="big" id="tot">0,00 €</div>
+    </div>
+    <button class="btn" id="go" disabled>Revisa la comanda</button>
+  </div>
 </div>
-<div id="ov" hidden><div id="sh"><div id="shc"></div></div></div><div id="toast"></div>
+
+<div id="ov" hidden><div id="sh"><div id="shc"></div></div></div>
+<div id="toast"></div>
+
 <script src="firebase-config.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-firebase.initializeApp(window.FB_CONFIG);const db=firebase.firestore().collection("sopar");
+firebase.initializeApp(window.FB_CONFIG);
+const db = firebase.firestore().collection("sopar");
 
 const RAW=`Per picar
 Braves|6.10
@@ -179,14 +261,31 @@ Affogato|6.70
 Crep de Nutella|5.00
 Crep de llimona|4.50
 Gelat de bola (vainilla, torró, xocolata...)|4.80`;
+
 const M=[];let cat;RAW.split("\n").forEach(l=>{if(l.includes("|")){const[n,p]=l.split("|");M.push({c:cat,n,p:+p,i:M.length})}else cat=l});
-const $=s=>document.querySelector(s),eur=v=>v.toFixed(2).replace(".",",")+" €",E=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const $=s=>document.querySelector(s),eur=v=>v.toFixed(2).replace(".",",")+" €",E=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]);
 const key=n=>n.trim().toLowerCase().replace(/\s+/g," ").replace(/[\/.#$\[\]]/g,""),nz=s=>key(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 const P=new URLSearchParams(location.search),AJ=P.has("ajuda"),ADM=P.has("admin");
 let q={},ok="",own="",nm="",tt;
 const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)||"";localStorage.setItem(k,v)}catch(e){return""}};
 
+// Escoltar l'evolució global de preus en temps real
+function listenGroupAverage(){
+  db.onSnapshot(s=>{
+    const docs=s.docs.map(d=>d.data());
+    if(!docs.length){
+      $("#group-est").textContent="📊 Estimació grup: Sense comandes";
+      return;
+    }
+    const totFood=docs.reduce((acc,d)=>acc+(d.total||0),0);
+    const avgFood=totFood/docs.length;
+    const estTotal=avgFood+8; // 8€ estimats de beguda/extres per defecte
+    $("#group-est").textContent=`📊 Mitjana grup: ~${eur(estTotal)}/pers (${docs.length} comandes)`;
+  });
+}
+
 function user(){
+ listenGroupAverage();
  let h="",ch="",c="",k=0;
  M.forEach(m=>{if(m.c!=c){c=m.c;h+=`<h2 id="s${k}">${E(c)}</h2>`;ch+=`<a href="#s${k}">${E(c)}</a>`;k++}
   h+=`<div class="it" data-i="${m.i}"><div class="n">${E(m.n)}<div class="p">${eur(m.p)}</div></div><span class="ck"></span></div>`});
@@ -198,6 +297,7 @@ function user(){
  if(AJ){$("#sub").textContent="Mode ajuda: fas la comanda d'una altra persona.";$("#rec").hidden=true;const n=P.get("nom");if(n){nm=n;own=key(n);fetchOrder(n)}}
  else{const n=ls("nom");if(n){nm=n;own=key(n);fetchOrder(n)}}
  paint()}
+
 function paint(){let t=0;document.querySelectorAll(".it").forEach(el=>el.classList.toggle("on",!!q[el.dataset.i]));
  Object.entries(q).forEach(([i,v])=>{if(M[i])t+=v*M[i].p});const n=Object.keys(q).filter(i=>M[i]).length;
  $("#cnt").textContent=n+(n==1?" plat":" plats");$("#tot").textContent=eur(t);$("#go").disabled=!n}
@@ -245,21 +345,35 @@ function admin(){
  $("#adm").innerHTML=`<div class="box"><div class="row"><div>Comensals<input id="np" type="number" min="1"></div><div>Begudes i extres per persona (€)<input id="bg" type="number" min="0" value="8"></div></div>
  <div style="margin-top:10px" class="s">Estimació per persona</div><div class="big" id="pp">–</div><div class="s" id="det"></div></div>
  <button class="btn" id="cp">Copia el resum per al restaurant</button> <a class="btn" style="display:inline-block;text-decoration:none;margin-top:8px" href="?ajuda">+ Comanda d'una altra persona</a>
- <h2>Per plat</h2><div id="tp"></div><h2>Per persona</h2><div id="tq"></div>`;
+ <h2>Per plat (servir a taula)</h2><div id="tp"></div><h2>Per persona</h2><div id="tq"></div>`;
  let docs=[],np=$("#np");
- const draw=()=>{let tot=0,cnt={};docs.forEach(d=>Object.entries(d.items||{}).forEach(([i,v])=>{if(M[i]){cnt[i]=(cnt[i]||0)+v;tot+=v*M[i].p}}));
+ const draw=()=>{
+  let tot=0,cnt={},who={};
+  docs.forEach(d=>{
+    Object.entries(d.items||{}).forEach(([i,v])=>{
+      if(M[i]){
+        cnt[i]=(cnt[i]||0)+v;
+        tot+=v*M[i].p;
+        if(!who[i])who[i]=[];
+        who[i].push(d.name+(v>1?` (${v})`:''));
+      }
+    });
+  });
+  
   const n=+np.value||docs.length||1,b=+$("#bg").value||0;
   $("#pp").textContent=eur(tot/n+b);$("#det").textContent=`Menjar ${eur(tot)} ÷ ${n} persones + ${eur(b)} begudes · ${docs.length} comandes rebudes`;
   const ids=Object.keys(cnt).sort((a,b)=>a-b);
   const cats=[...new Set(M.map(m=>m.c))],G=a=>cats.map(c=>[c,a.filter(i=>M[i].c===c)]).filter(x=>x[1].length),its=d=>Object.keys(d.items||{}).filter(i=>M[i]);
-  $("#tp").innerHTML="<table>"+G(ids).map(([c,l])=>`<tr><th colspan="2" style="padding-top:18px;color:var(--ac)">${E(c)} · ${l.reduce((s,i)=>s+cnt[i],0)}</th></tr>`+l.map(i=>`<tr><td><b>${cnt[i]}×</b> ${E(M[i].n)}</td><td class="r">${eur(cnt[i]*M[i].p)}</td></tr>`).join("")).join("")+"</table>";
+  
+  $("#tp").innerHTML="<table>"+G(ids).map(([c,l])=>`<tr><th colspan="2" style="padding-top:18px;color:var(--ac)">${E(c)} · ${l.reduce((s,i)=>s+cnt[i],0)}</th></tr>`+l.map(i=>`<tr><td><b>${cnt[i]}×</b> ${E(M[i].n)}<div class="people-tag">👤 ${E(who[i].join(", "))}</div></td><td class="r">${eur(cnt[i]*M[i].p)}</td></tr>`).join("")).join("")+"</table>";
   $("#tq").innerHTML="<table>"+docs.map(d=>`<tr><td><b>${E(d.name)}</b>${G(its(d)).map(([c,l])=>`<div class="s" style="margin:8px 0 0">${E(c)}</div>`+l.map(i=>`<div>${(d.items[i]>1?d.items[i]+"× ":"")+E(M[i].n)}</div>`).join("")).join("")}</td><td class="r">${eur(d.total||0)}<br><a href="?ajuda&nom=${encodeURIComponent(d.name)}">Edita</a> · <a href="#" data-del="${E(d.name)}">Esborra</a></td></tr>`).join("")+"</table>";
-  window._txt="PER PLAT\n"+G(ids).map(([c,l])=>c.toUpperCase()+"\n"+l.map(i=>`${cnt[i]}x ${M[i].n}`).join("\n")).join("\n\n")+"\n\nPER PERSONA\n"+docs.map(d=>d.name+": "+its(d).map(i=>d.items[i]+"x "+M[i].n).join("; ")).join("\n")};
+  window._txt="PER PLAT\n"+G(ids).map(([c,l])=>c.toUpperCase()+"\n"+l.map(i=>`${cnt[i]}x ${M[i].n} (${who[i].join(", ")})`).join("\n")).join("\n\n")+"\n\nPER PERSONA\n"+docs.map(d=>d.name+": "+its(d).map(i=>d.items[i]+"x "+M[i].n).join("; ")).join("\n")};
+ 
  np.oninput=$("#bg").oninput=draw;
  db.orderBy("name").onSnapshot(s=>{docs=s.docs.map(d=>d.data());if(!np.value)np.value=docs.length;draw()});
  $("#tq").onclick=e=>{const a=e.target.closest("[data-del]");if(!a)return;e.preventDefault();const n=a.dataset.del;if(confirm("Esborrar la comanda de "+n+"?"))db.doc(key(n)).delete()};
  $("#cp").onclick=()=>navigator.clipboard.writeText(window._txt||"").then(()=>$("#cp").textContent="Copiat ✓");
 }
 
-if(ADM){$("#usr").hidden=true;$("#adm").hidden=false;$("#sub").textContent="Panell d'administració";admin()}else user();
+if(ADM){$("#usr").hidden=true;$("#adm").hidden=false;$("#sub").textContent="Panell d'administració";$("#group-est").hidden=true;admin()}else user();
 </script></body></html>
