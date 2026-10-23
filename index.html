@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ca"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sopar de comiat · Comanda</title>
+<style>
+:root{--bg:#fffaf5;--fg:#2b2320;--card:#fff;--ac:#c2410c;--mu:#7c6f68;--bd:#eadfd6;--sel:#ffe7cf}
+@media(prefers-color-scheme:dark){:root{--bg:#1d1816;--fg:#f3ebe5;--card:#2a2320;--ac:#fb923c;--mu:#b3a59c;--bd:#40352f;--sel:#5a2e12}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px system-ui,sans-serif;padding:16px 14px 110px;max-width:640px;margin:auto}
+h1{font-size:22px;margin:4px 0}h2{font-size:17px;margin:22px 0 6px;color:var(--ac);position:sticky;top:0;background:var(--bg);padding:6px 0}
+p.s{color:var(--mu);margin:0 0 12px;font-size:14px}
+input{width:100%;padding:12px;border:1px solid var(--bd);border-radius:10px;font-size:16px;background:var(--card);color:var(--fg)}
+.it{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;margin:6px 0}
+.it .n{flex:1;font-size:15px}.it .p{color:var(--mu);font-size:13px;white-space:nowrap}
+.it{cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;padding:12px}
+.ck{width:30px;height:30px;flex:none;border:2px solid var(--bd);border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700}
+.it.on{background:var(--sel);box-shadow:0 0 0 2px var(--ac);border-color:var(--ac)}.it.on .n{font-weight:700}.it.on .ck{background:var(--ac);border-color:var(--ac)}
+#bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--bd);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:12px;align-items:center;justify-content:space-between}
+#bar button,.btn{background:var(--ac);color:#fff;border:0;border-radius:10px;padding:12px 18px;font-size:16px;font-weight:600}
+#msg{font-size:14px;color:var(--mu);margin-top:6px}
+table{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}td,th{padding:6px 4px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top}td.r,th.r{text-align:right;white-space:nowrap}
+.box{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin:12px 0}
+.big{font-size:26px;font-weight:700;color:var(--ac)}.row{display:flex;gap:10px}.row>*{flex:1}
+</style></head><body>
+<h1>🍽️ Sopar de comiat</h1>
+<p class="s">Escriu el teu nom, toca els plats que vols i prem «Desa». Pots tornar a entrar i canviar-ho fins a la data límit.</p>
+<div id="adm" hidden></div>
+<div id="usr">
+<input id="nom" placeholder="El teu nom i cognom" autocomplete="name">
+<div id="msg"></div>
+<div id="menu"></div>
+<div id="bar"><div><div style="font-size:12px;color:var(--mu)">El teu total (aprox.)</div><div class="big" id="tot">0,00 €</div></div><button id="sv">Desa la comanda</button></div>
+</div>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+// 1) Enganxa aquí la configuració del teu projecte Firebase (Configuració del projecte → Les teves apps → Web)
+const FB={apiKey:"POSA_AQUI",authDomain:"POSA_AQUI",projectId:"POSA_AQUI",appId:"POSA_AQUI"};
+firebase.initializeApp(FB);const db=firebase.firestore().collection("sopar");
+
+const RAW=`Per picar
+Braves|6.10
+Tapa «Bandolers» (pollastre cruixent)|8.80
+Croquetes d'rostit de la Quimeta|9.90
+Llagostins cruixents agredolços|10.70
+Croquetes d'ànec de l'Empordà (sense gluten)|7.00
+Croquetes de calçots|9.10
+Croquetes de formatge i ceba|9.00
+Assortit d'embotits|11.65
+Gyozas de llagostins|9.50
+Antipasti (focaccia, porcheta...)|12.50
+Entrants
+Sopa de ceba i farigola amb ou escalfat|9.90
+Escudella barrejada (temporada)|10.55
+Truita de patata i ceba|9.90
+Ous estrellats amb pernil ibèric|11.00
+Ous ferrats amb sobrassada i patates|9.95
+Assortit de formatges|11.65
+Meló amb pernil (temporada)|10.40
+Carpaccio de manetes de porc|12.15
+Amanides
+Amanida de l'hort|8.90
+Amanida de formatge de cabra, mel i fruits secs|10.55
+Amanida de salmó amb vinagreta d'anet|10.55
+Amanida de burrata|10.80
+Amanida catalana amb embotits d'Arbúcies|10.55
+Amanida terra i mar (esqueixada)|10.95
+Vegà
+Wok d'arròs integral amb verdures i llavors|10.55
+Vegeburger d'civada, pastanaga i tofu|9.50
+Guacamole amb nachos|10.55
+Gaspatxo (temporada)|8.95
+Carxofes arrebossades (temporada)|9.60
+Calçots a la brasa (temporada)|10.65
+Gyozas de verdures|8.90
+Pasta
+Tagliatelle (carbonara/arrabbiata/pesto/bolonyesa/puttanesca)|10.45
+Tagliolini negre de sèpia amb gambes|11.95
+Pansotti de espinacs i formatge amb salsa de nous|12.95
+Canelons casolans d'rostit|11.35
+Canelons XL de foie i tòfona|14.20
+Graella (amb patates fregides)
+Manetes de porc amb allioli|11.90
+Entranya de vedella amb mostassa i romaní|13.75
+Secret de porc amb teriyaki|12.50
+Botifarra de pagès|10.00
+Botifarra d'ànec de l'Empordà|11.90
+Xai d'Arbúcies (costelles i mitjanes)|18.50
+Galtes de porc|11.90
+Entrecot de vedella 350 g (bolets o pebre verd)|19.95
+Filet de vedella de Girona|23.00
+Pollastre marinat amb herbes del Montseny|10.50
+Xuletó 600 g|26.00
+Churrasco|12.40
+Conill amb allioli|10.90
+Montsoliu-Burger|12.50
+Hamburguesa de màgret d'ànec|11.90
+Guisats
+Manetes de porc guisades|13.00
+Galta de porc rostida al forn|13.50
+Vedella amb bolets de temporada|14.90
+Cap i pota de vedella|12.50
+Peix
+Salmó a la planxa amb soja i verdures|12.55
+Calamars a la planxa|11.50
+Sèpia a la planxa|11.60
+Gambes a la planxa|20.70
+Pop a la brasa|17.90
+Coques
+Coca porcheta i ricotta|10.90
+Coca sobrassada, Brie i codonyat|10.90
+Coca bacallà amb allioli|10.85
+Coca «Bull» negre, emmental i mostassa|9.00
+Coca pernil Duroc i formatge de cabra|10.70
+Coca llom amb formatge|9.75
+Coca tonyina, mozzarella i orenga|9.25
+Coca bolonyesa i formatge de cabra|10.90
+Biquini|4.50
+Pizzes
+Pizza Margarita|9.50
+Pizza Maca (pernil dolç)|10.50
+Pizza Salami|10.50
+Pizza Luminosa|12.60
+Pizza Tonyina|11.95
+Pizza Caprichosa|11.70
+Pizza Hawaiana|11.50
+Pizza Vegetal|11.50
+Pizza Quatre formatges|11.55
+Pizza Ibèrica|14.55
+Pizza Calabresa|12.50
+Pizza Mediterrània|13.55
+Pizza Burrata|13.50
+Pizza Italiana|13.55
+Pizza Montsoliu (bacallà)|12.60
+Pizza Montseny|12.60
+Pizza Carlo|11.45
+Pizza Amore|12.50
+Pizza Mallorquina|12.50
+Pizza Carbonara|12.55
+Pizza Ranchera|12.60
+Pizza Cris|13.50
+Pizza Blanca|13.00
+Focaccia per compartir|9.95
+Postres
+Suc de taronja natural|3.50
+Mousse de xocolata|4.90
+Valencianet|5.70
+Tiramisú|5.70
+Crema catalana|4.40
+Flam d'ou amb nata|4.40
+Mató amb mel|4.70
+Postres de músic amb director|4.70
+Catalanet|5.70
+Jaumets de Sant Hilari amb vi dolç|4.70
+Iogurt amb fruits vermells i crumble|4.00
+Coulant de xocolata|5.35
+Pastís de formatge amb confitura de nabius|4.70
+Coulant de xocolata amb Baileys|6.35
+Brownie de xocolata i nous amb gelat|6.70
+Focaccia de Nutella (per compartir)|9.95
+Fruita del temps|3.15
+Affogato|6.70
+Crep de Nutella|5.00
+Crep de llimona|4.50
+Gelat de bola (vainilla, torró, xocolata...)|4.80`;
+const M=[];let cat;RAW.split("\n").forEach(l=>{if(l.includes("|")){const[n,p]=l.split("|");M.push({c:cat,n,p:+p,i:M.length})}else cat=l});
+const $=s=>document.querySelector(s),eur=v=>v.toFixed(2).replace(".",",")+" €",E=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const key=n=>n.trim().toLowerCase().replace(/\s+/g," ").replace(/[\/.#$\[\]]/g,"");
+let q={},ok="";const P=new URLSearchParams(location.search),AJ=P.has("ajuda");
+const nz=s=>key(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+
+if(location.search.includes("admin")){$("#usr").hidden=true;$("#adm").hidden=false;admin()}else user();
+
+function user(){
+ let h="",c="";M.forEach(m=>{if(m.c!=c){c=m.c;h+=`<h2>${E(c)}</h2>`}
+  h+=`<div class="it" id="i${m.i}" data-i="${m.i}"><div class="n">${E(m.n)}<div class="p">${eur(m.p)}</div></div><span class="ck" id="q${m.i}"></span></div>`});
+ $("#menu").innerHTML=h;
+ $("#menu").onclick=e=>{const b=e.target.closest(".it");if(!b)return;const i=b.dataset.i;q[i]?delete q[i]:q[i]=1;paint()};
+ if(AJ){$(".s").textContent="Mode ajuda: fas la comanda d'una altra persona. Escriu-ne el nom, tria els plats i desa. Després pots fer-ne una altra.";$("#nom").placeholder="Nom de la persona"}
+ $("#nom").value=AJ?(P.get("nom")||""):(localStorage.getItem("nom")||"");if($("#nom").value)load();
+ $("#nom").onchange=load;$("#sv").onclick=save;
+}
+function paint(){let t=0;M.forEach(m=>{const v=q[m.i]||0;$("#q"+m.i).textContent=v?"✓":"";$("#i"+m.i).classList.toggle("on",v>0);t+=v*m.p});$("#tot").textContent=eur(t)}
+async function names(){return(await db.get()).docs.map(d=>d.data().name)}
+async function sim(n){const k=key(n);if(ok&&k.startsWith(ok))return[];const b=nz(n),bf=b.split(" ")[0];
+ return(await names()).filter(x=>{const a=nz(x);return a.split(" ")[0]===bf||(b.length>1&&a.startsWith(b))||(a.length>1&&b.startsWith(a))})}
+function ask(n,L){const m=$("#msg");m.innerHTML="Ja hi ha comandes amb un nom semblant. Ets tu?<br>"+L.map((x,i)=>`<button class="btn" style="margin:6px 6px 0 0" data-s="${i}">Sí, sóc ${E(x)}</button>`).join("")+`<button class="btn" id="no" style="margin-top:6px;background:none;color:var(--ac);border:1px solid var(--ac)">No, sóc una altra persona</button>`;
+ m.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{$("#nom").value=L[b.dataset.s];load()});
+ $("#no").onclick=()=>{ok=key(n);m.textContent="Perfecte. Afegeix-hi el cognom si cal i desa la comanda."}}
+async function load(){const n=$("#nom").value.trim();if(!n)return;if(!AJ)try{localStorage.setItem("nom",n)}catch(e){}
+ try{const d=await db.doc(key(n)).get();q={};
+  if(d.exists){Object.entries(d.data().items||{}).forEach(([k,v])=>q[k]=v);$("#msg").textContent="✓ He recuperat la comanda. Pots modificar-la i tornar a desar."}
+  else{$("#msg").textContent="";const L=await sim(n);if(L.length)ask(n,L)}
+  paint()}catch(e){$("#msg").textContent="No puc connectar amb la base de dades."}}
+async function save(){const n=$("#nom").value.trim();if(!n){$("#msg").textContent="Escriu primer el teu nom.";$("#nom").focus();return}
+ let t=0;Object.entries(q).forEach(([i,v])=>t+=v*M[i].p);
+ try{if(!(await db.doc(key(n)).get()).exists){const L=await sim(n);if(L.length){ask(n,L);return}}
+  await db.doc(key(n)).set({name:n,items:q,total:t,ts:Date.now()});if(!AJ)try{localStorage.setItem("nom",n)}catch(e){}
+  $("#msg").innerHTML="✅ <b>Comanda desada!</b> Total aproximat: "+eur(t)+". Si vols canviar-la, torna a entrar amb el mateix nom."+(AJ?" Pots fer la comanda següent.":"");if(AJ){q={};$("#nom").value="";ok="";paint()}}catch(e){$("#msg").textContent="⚠️ No s'ha pogut desar. Torna-ho a provar."}}
+
+function admin(){
+ $("#adm").innerHTML=`<div class="box"><div class="row"><div>Comensals<input id="np" type="number" min="1"></div><div>Begudes i extres per persona (€)<input id="bg" type="number" min="0" value="8"></div></div>
+ <div style="margin-top:10px" class="s">Estimació per persona</div><div class="big" id="pp">–</div><div class="s" id="det"></div></div>
+ <button class="btn" id="cp">Copia el resum per al restaurant</button> <a class="btn" style="display:inline-block;text-decoration:none;margin-top:8px" href="?ajuda">+ Comanda d'una altra persona</a>
+ <h2>Per plat</h2><div id="tp"></div><h2>Per persona</h2><div id="tq"></div>`;
+ let docs=[],np=$("#np");
+ const draw=()=>{let tot=0,cnt={};docs.forEach(d=>Object.entries(d.items||{}).forEach(([i,v])=>{if(M[i]){cnt[i]=(cnt[i]||0)+v;tot+=v*M[i].p}}));
+  const n=+np.value||docs.length||1,b=+$("#bg").value||0;
+  $("#pp").textContent=eur(tot/n+b);$("#det").textContent=`Menjar ${eur(tot)} ÷ ${n} persones + ${eur(b)} begudes · ${docs.length} comandes rebudes`;
+  const ids=Object.keys(cnt).sort((a,b)=>a-b);
+  $("#tp").innerHTML="<table>"+ids.map(i=>`<tr><td><b>${cnt[i]}×</b> ${E(M[i].n)}</td><td class="r">${eur(cnt[i]*M[i].p)}</td></tr>`).join("")+"</table>";
+  $("#tq").innerHTML="<table>"+docs.map(d=>`<tr><td><b>${E(d.name)}</b><br>${Object.entries(d.items||{}).filter(([i])=>M[i]).map(([i,v])=>(v>1?v+"× ":"")+E(M[i].n)).join("<br>")}</td><td class="r">${eur(d.total||0)}<br><a href="?ajuda&nom=${encodeURIComponent(d.name)}">Edita</a> · <a href="#" data-del="${E(d.name)}">Esborra</a></td></tr>`).join("")+"</table>";
+  window._txt="PER PLAT\n"+ids.map(i=>`${cnt[i]}x ${M[i].n}`).join("\n")+"\n\nPER PERSONA\n"+docs.map(d=>d.name+": "+Object.entries(d.items||{}).filter(([i])=>M[i]).map(([i,v])=>v+"x "+M[i].n).join("; ")).join("\n")};
+ np.oninput=$("#bg").oninput=draw;
+ db.orderBy("name").onSnapshot(s=>{docs=s.docs.map(d=>d.data());if(!np.value)np.value=docs.length;draw()});
+ $("#tq").onclick=e=>{const a=e.target.closest("[data-del]");if(!a)return;e.preventDefault();const n=a.dataset.del;if(confirm("Esborrar la comanda de "+n+"?"))db.doc(key(n)).delete()};
+ $("#cp").onclick=()=>navigator.clipboard.writeText(window._txt||"").then(()=>$("#cp").textContent="Copiat ✓");
+}
+</script></body></html>
