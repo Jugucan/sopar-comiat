@@ -750,8 +750,22 @@ function admin(){
    let txt = "RESUM PER AL RESTAURANT\n\n";
    let cnt = {};
    docs.forEach(d=>Object.entries(d.items||{}).forEach(([i,v])=>{ if(M[i]) cnt[i]=(cnt[i]||0)+v; }));
-   Object.keys(cnt).forEach(i=>{ txt += `${cnt[i]}x ${M[i].n}\n`; });
-   navigator.clipboard.writeText(txt).then(()=>toast("Resum copiat al porta-retalls ✓"));
+   
+   const categories = [...new Set(M.map(m=>m.c))];
+   
+   categories.forEach(c => {
+     const itemsCat = Object.keys(cnt).filter(i => M[i].c === c);
+     if(itemsCat.length > 0){
+       const totalCat = itemsCat.reduce((acc, i) => acc + cnt[i], 0);
+       txt += `${c.toUpperCase()} (${totalCat})\n`;
+       itemsCat.forEach(i => {
+         txt += `• ${cnt[i]}x ${M[i].n}\n`;
+       });
+       txt += "\n";
+     }
+   });
+
+   navigator.clipboard.writeText(txt.trim()).then(()=>toast("Resum organitzat copiat al porta-retalls ✓"));
  };
 
  db.orderBy("name").onSnapshot(s => {
