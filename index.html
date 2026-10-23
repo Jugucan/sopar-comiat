@@ -3,30 +3,37 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#faf8f4">
 <title>Sopar de comiat · Comanda</title>
+<!-- Lucide Icons & Fonts -->
+<script src="https://unpkg.com/lucide@latest"></script>
 <style>
 :root{
   --bg:#f8f6f0;--fg:#1c1b18;--mu:#787268;--card:#ffffff;--bd:#e6e1d7;
-  --ac:#2d5a45;--ac-bg:#edf4f0;--on:#ffffff;--sel:#f0f7f2;--shadow:0 4px 20px rgba(0,0,0,0.05);
+  --ac:#2d5a45;--ac-bg:#edf4f0;--on:#ffffff;--sel:#f0f7f2;--shadow:0 2px 10px rgba(0,0,0,0.04);
+  --danger:#d1473d;--danger-bg:#fdf2f1;
 }
 @media(prefers-color-scheme:dark){
   :root{
     --bg:#121210;--fg:#f0ece1;--mu:#9e978b;--card:#1a1a18;--bd:#2e2c28;
     --ac:#62c396;--ac-bg:#162b21;--on:#0a1711;--sel:#182b22;--shadow:0 4px 20px rgba(0,0,0,0.3);
+    --danger:#e55347;--danger-bg:#2a1816;
   }
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{overflow-x:hidden;overflow-x:clip;max-width:100%;-webkit-text-size-adjust:100%}
 body{
-  margin:0 auto;max-width:640px;padding:24px 16px 120px;background:var(--bg);color:var(--fg);
+  margin:0 auto;max-width:680px;padding:24px 16px 120px;background:var(--bg);color:var(--fg);
   font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overflow-wrap:break-word;
 }
+body.admin-mode{max-width:960px}
 body.lock{overflow:hidden}
-.eyebrow{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--mu)}
-h1,h2,h3{font-family:ui-serif,Georgia,serif;font-weight:600;letter-spacing:-.01em}
-h1{font-size:32px;line-height:1.15;margin:4px 0 8px}
-h2{font-size:20px;margin:28px 0 10px;scroll-margin-top:70px;border-bottom:1px solid var(--bd);padding-bottom:6px}
-h3{font-size:22px;margin:0 0 12px}
-.s{color:var(--mu);font-size:13.5px;margin:0 0 10px}
+
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mu)}
+h1,h2,h3{font-family:ui-serif,Georgia,serif;font-weight:600;letter-spacing:-.01em;margin:0}
+h1{font-size:32px;line-height:1.15;margin-top:4px}
+h2{font-size:20px;margin:24px 0 12px;border-bottom:1px solid var(--bd);padding-bottom:6px}
+h3{font-size:20px}
+.s{color:var(--mu);font-size:13.5px;margin:4px 0 12px}
+
 .lnk{background:none;border:0;color:var(--ac);text-decoration:none;font:inherit;font-size:13.5px;font-weight:600;padding:6px 0;cursor:pointer}
 .lnk:hover{text-decoration:underline}
 
@@ -35,6 +42,7 @@ h3{font-size:22px;margin:0 0 12px}
   padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600;margin:8px 0 14px;border:1px solid var(--bd);
 }
 
+/* Nav i llista */
 #nav{position:sticky;top:0;z-index:20;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:10px 16px;background:var(--bg)}
 #nav::-webkit-scrollbar{display:none}
 #nav a{
@@ -52,39 +60,42 @@ h3{font-size:22px;margin:0 0 12px}
 
 #bar{
   position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;align-items:center;justify-content:space-between;
-  gap:12px;padding:12px max(16px,calc((100vw - 640px)/2 + 16px)) calc(12px + env(safe-area-inset-bottom,0px));
+  gap:12px;padding:12px max(16px,calc((100vw - 680px)/2 + 16px)) calc(12px + env(safe-area-inset-bottom,0px));
   background:var(--card);border-top:1px solid var(--bd);box-shadow:0 -4px 20px rgba(0,0,0,0.05);
 }
 #bar .s{margin:0}.big{font-size:20px;font-weight:700;color:var(--ac)}
 .btn{
-  background:var(--ac);color:var(--on);border:0;border-radius:12px;padding:12px 18px;
-  font:600 15px inherit;font-family:inherit;cursor:pointer;transition:opacity .15s;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  background:var(--ac);color:var(--on);border:0;border-radius:10px;padding:10px 16px;
+  font:600 14px inherit;font-family:inherit;cursor:pointer;transition:opacity .15s;text-decoration:none;
 }
 .btn:active{opacity:.85}.btn:disabled{opacity:.4}
 .btn.ghost{background:none;color:var(--fg);border:1px solid var(--bd)}
+.btn.danger{background:var(--danger-bg);color:var(--danger);border:1px solid var(--danger)}
+.btn.sm{padding:6px 12px;font-size:13px;border-radius:8px}
 
-input{
-  width:100%;padding:12px 14px;border:1px solid var(--bd);border-radius:12px;
-  font:inherit;font-size:15px;background:var(--card);color:var(--fg);outline:none;
+input, select{
+  width:100%;padding:10px 12px;border:1px solid var(--bd);border-radius:10px;
+  font:inherit;font-size:14.5px;background:var(--card);color:var(--fg);outline:none;
 }
 input:focus{border-color:var(--ac)}
 
 #ov{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center}
 #ov[hidden]{display:none}
 #sh{
-  width:100%;max-width:640px;max-height:88vh;overflow-y:auto;background:var(--bg);
+  width:100%;max-width:680px;max-height:88vh;overflow-y:auto;background:var(--bg);
   border-radius:20px 20px 0 0;padding:22px 18px calc(18px + env(safe-area-inset-bottom,0px));
   animation:up .22s ease-out;box-shadow:0 -10px 30px rgba(0,0,0,0.15);
 }
 @keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
-#sh .btn{display:block;width:100%;margin-top:10px}
+#sh .btn{display:inline-flex;width:100%;margin-top:10px}
 #sh label{display:block;font-size:13px;font-weight:600;color:var(--mu);margin:12px 0 6px}
 
 .sum{list-style:none;margin:0;padding:0}
 .sum li{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--bd);font-size:14.5px}
 .sum b{font-weight:600;white-space:nowrap}
 .tl{display:flex;justify-content:space-between;padding:14px 0 6px;font-weight:700;font-size:16px}
-#err{color:#d1473d;font-size:13.5px;margin-top:8px}
+#err{color:var(--danger);font-size:13.5px;margin-top:8px}
 .ok{width:50px;height:50px;border-radius:50%;background:var(--ac);color:var(--on);display:grid;place-items:center;font-size:24px;margin-bottom:12px}
 
 #toast{
@@ -94,18 +105,42 @@ input:focus{border-color:var(--ac)}
 }
 #toast.show{opacity:1;transform:translate(-50%,0)}
 
-.box{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin:12px 0;box-shadow:var(--shadow)}
-.row{display:flex;gap:12px}.row>*{flex:1;min-width:0}
+/* Admin Lovable Styles */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:20px 0;padding:16px 0;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd)}
+@media(min-width:600px){.stats-grid{grid-template-columns:repeat(4,1fr)}}
+.stat-card{padding-right:8px}
+.stat-k{font-size:12px;color:var(--mu)}
+.stat-v{font-size:24px;font-weight:700;line-height:1.2;margin:2px 0}
+.stat-v.strong{color:var(--ac);font-family:ui-serif,Georgia,serif;font-size:28px}
+.stat-sub{font-size:12px;color:var(--mu)}
 
-table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:14px}
-td,th{padding:10px 6px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top;overflow-wrap:anywhere}
-td.r{width:90px;text-align:right}
-.people-tag{font-size:12.5px;color:var(--mu);margin-top:3px;line-height:1.3}
+.segmented{display:inline-flex;background:var(--card);border:1px solid var(--bd);padding:3px;border-radius:10px;gap:2px}
+.segmented button{border:0;background:none;padding:6px 16px;border-radius:8px;font-size:13.5px;font-weight:600;color:var(--mu);cursor:pointer}
+.segmented button.active{background:var(--ac-bg);color:var(--ac)}
+
+.cat-pills{display:flex;gap:6px;overflow-x:auto;padding:8px 0;scrollbar-width:none}
+.cat-pills::-webkit-scrollbar{display:none}
+.pill{flex:none;padding:5px 12px;border:1px solid var(--bd);border-radius:999px;background:var(--card);font-size:12.5px;font-weight:500;color:var(--mu);cursor:pointer;white-space:nowrap}
+.pill.active{background:var(--ac);color:var(--on);border-color:var(--ac)}
+
+.dish-card{background:var(--card);border:1px solid var(--bd);border-radius:12px;margin-bottom:8px;overflow:hidden;box-shadow:var(--shadow)}
+.dish-head{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;user-select:none}
+.dish-qty{font-family:ui-serif,Georgia,serif;font-size:32px;font-weight:700;color:var(--ac);width:36px;text-align:center;line-height:1}
+.dish-people{border-top:1px solid var(--bd);padding:8px 16px;background:var(--bg)}
+.person-row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-bottom:1px dashed var(--bd)}
+.person-row:last-child{border-bottom:0}
+
+.person-card{background:var(--card);border:1px solid var(--bd);border-radius:12px;margin-bottom:8px;overflow:hidden;box-shadow:var(--shadow)}
+.person-head{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--ac-bg);color:var(--ac);display:grid;place-items:center;font-weight:700;font-size:13px}
+
+.admin-layout{display:grid;grid-template-columns:1fr;gap:20px}
+@media(min-width:768px){.admin-layout{grid-template-columns:1fr 300px}}
 </style></head><body>
 
-<header>
-  <div class="eyebrow">Hotel Montsoliu</div>
-  <h1>Sopar de comiat</h1>
+<header id="main-hdr">
+  <div class="eyebrow">Hotel Montsoliu · Sopar de comiat</div>
+  <h1 id="main-title">Sopar de comiat</h1>
   <p class="s" id="sub">Toca els plats que vols. Al final revisaràs la comanda i la desaràs amb el teu nom.</p>
   <div class="avg-badge" id="group-est">📊 Estimació grup: Calculant…</div>
 </header>
@@ -262,65 +297,47 @@ Crep de llimona|4.50
 Gelat de bola (vainilla, torró, xocolata...)|4.80`;
 
 const M=[];let cat;RAW.split("\n").forEach(l=>{if(l.includes("|")){const[n,p]=l.split("|");M.push({c:cat,n,p:+p,i:M.length})}else cat=l});
-const $=s=>document.querySelector(s),eur=v=>v.toFixed(2).replace(".",",")+" €",E=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const $=s=>document.querySelector(s),eur=v=>v.toFixed(2).replace(".",",")+" €",E=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]);
 const key=n=>n.trim().toLowerCase().replace(/\s+/g," ").replace(/[\/.#$\[\]]/g,""),nz=s=>key(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 const P=new URLSearchParams(location.search),AJ=P.has("ajuda"),ADM=P.has("admin");
 let q={},ok="",own="",nm="",tt;
 const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)||"";localStorage.setItem(k,v)}catch(e){return""}};
 
-// Funció segura per calcular la mitjana del grup sense bloquejar la carta si falla
 function listenGroupAverage(){
   try {
     db.onSnapshot(s=>{
       const docs=s.docs.map(d=>d.data());
       if(!docs.length){
-        $("#group-est").textContent="📊 Estimació grup: Encara sense comandes";
+        $("#group-est").textContent="📊 Estimació grup: Sense comandes";
         return;
       }
       const totFood=docs.reduce((acc,d)=>acc+(d.total||0),0);
       const avgFood=totFood/docs.length;
       const estTotal=avgFood+8;
       $("#group-est").textContent=`📊 Mitjana grup: ~${eur(estTotal)}/pers (${docs.length} comandes)`;
-    }, err=>{
-      console.warn("No s'ha pogut carregar l'estimació global:", err);
-      $("#group-est").textContent="📊 Estimació grup: No disponible";
-    });
-  } catch(e) {
-    $("#group-est").textContent="📊 Estimació grup: No disponible";
-  }
+    }, err=>{$("#group-est").textContent="📊 Estimació grup: No disponible"});
+  } catch(e){$("#group-est").textContent="📊 Estimació grup: No disponible"}
 }
 
 function user(){
-  // Pinta la carta de manera immediata i independent
   let h="",ch="",c="",k=0;
   M.forEach(m=>{
-    if(m.c!=c){
-      c=m.c;
-      h+=`<h2 id="s${k}">${E(c)}</h2>`;
-      ch+=`<a href="#s${k}">${E(c)}</a>`;
-      k++;
-    }
+    if(m.c!=c){c=m.c;h+=`<h2 id="s${k}">${E(c)}</h2>`;ch+=`<a href="#s${k}">${E(c)}</a>`;k++}
     h+=`<div class="it" data-i="${m.i}"><div class="n">${E(m.n)}<div class="p">${eur(m.p)}</div></div><span class="ck"></span></div>`;
   });
-  $("#menu").innerHTML=h;
-  $("#nav").innerHTML=ch;
-  
+  $("#menu").innerHTML=h;$("#nav").innerHTML=ch;
   $("#nav").onclick=e=>{const a=e.target.closest("a");if(!a)return;e.preventDefault();document.querySelector(a.getAttribute("href")).scrollIntoView({behavior:"smooth"})};
   $("#menu").onclick=e=>{const b=e.target.closest(".it");if(!b)return;const i=b.dataset.i;q[i]?delete q[i]:q[i]=1;paint()};
   $("#go").onclick=review;$("#rec").onclick=recoverUI;
-  $("#ov").onclick=e=>{if(e.target.id==="ov")closeM()};
-  document.onkeydown=e=>{if(e.key==="Escape")closeM()};
+  $("#ov").onclick=e=>{if(e.target.id==="ov")closeM()};document.onkeydown=e=>{if(e.key==="Escape")closeM()};
 
   if(AJ){
-    $("#sub").textContent="Mode ajuda: fas la comanda d'una altra persona.";
-    $("#rec").hidden=true;
+    $("#sub").textContent="Mode ajuda: fas la comanda d'una altra persona.";$("#rec").hidden=true;
     const n=P.get("nom");if(n){nm=n;own=key(n);fetchOrder(n)}
   } else {
     const n=ls("nom");if(n){nm=n;own=key(n);fetchOrder(n)}
   }
   paint();
-
-  // Activa la subscripció en segon pla
   listenGroupAverage();
 }
 
@@ -329,7 +346,7 @@ function paint(){let t=0;document.querySelectorAll(".it").forEach(el=>el.classLi
  $("#cnt").textContent=n+(n==1?" plat":" plats");$("#tot").textContent=eur(t);$("#go").disabled=!n}
 function total(){let t=0;Object.entries(q).forEach(([i,v])=>{if(M[i])t+=v*M[i].p});return t}
 function toast(m){const x=$("#toast");x.textContent=m;x.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>x.classList.remove("show"),3500)}
-function sheet(h){$("#shc").innerHTML=h;$("#ov").hidden=false;document.body.classList.add("lock")}
+function sheet(h){$("#shc").innerHTML=h;$("#ov").hidden=false;document.body.classList.add("lock");if(window.lucide)lucide.createIcons()}
 function closeM(){$("#ov").hidden=true;document.body.classList.remove("lock")}
 function err(m){const x=$("#err");if(x)x.textContent=m}
 function fill(d){q={};Object.entries(d.items||{}).forEach(([k,v])=>q[k]=v)}
@@ -367,39 +384,238 @@ async function recover(n){if(!n){err("Escriu el nom.");return}
    $("#err").querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>recover(L[b.dataset.r]))}
  }catch(e){err("No puc connectar amb la base de dades.")}}
 
+// LÒGICA D'ADMINISTRACIÓ ESTIL LOVABLE
 function admin(){
- $("#adm").innerHTML=`<div class="box"><div class="row"><div>Comensals<input id="np" type="number" min="1"></div><div>Begudes i extres per persona (€)<input id="bg" type="number" min="0" value="8"></div></div>
- <div style="margin-top:10px" class="s">Estimació per persona</div><div class="big" id="pp">–</div><div class="s" id="det"></div></div>
- <button class="btn" id="cp">Copia el resum per al restaurant</button> <a class="btn" style="display:inline-block;text-decoration:none;margin-top:8px" href="?ajuda">+ Comanda d'una altra persona</a>
- <h2>Per plat (servir a taula)</h2><div id="tp"></div><h2>Per persona</h2><div id="tq"></div>`;
- let docs=[],np=$("#np");
- const draw=()=>{
-  let tot=0,cnt={},who={};
+ document.body.classList.add("admin-mode");
+ $("#main-title").textContent="Gestió del sopar";
+ $("#sub").textContent="Comandes del sopar per persona, per plat i estimació global.";
+ $("#group-est").hidden=true;
+
+ $("#adm").innerHTML=`
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+    <div style="display:flex;gap:8px;">
+      <button class="btn ghost sm" id="btn-summary"><i data-lucide="clipboard-copy" style="width:14px;height:14px"></i> Copia el resum per al restaurant</button>
+      <a class="btn sm" href="?ajuda"><i data-lucide="plus" style="width:14px;height:14px"></i> Comanda d'una altra persona</a>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-k">Comandes</div><div class="stat-v" id="st-people">0</div><div class="stat-sub" id="st-guests">de - comensals</div></div>
+    <div class="stat-card"><div class="stat-k">Racions</div><div class="stat-v" id="st-servings">0</div><div class="stat-sub" id="st-dishes">0 plats diferents</div></div>
+    <div class="stat-card"><div class="stat-k">Cost menjar</div><div class="stat-v" id="st-food">0,00 €</div><div class="stat-sub">acumulat</div></div>
+    <div class="stat-card"><div class="stat-k">Per persona</div><div class="stat-v strong" id="st-perperson">0,00 €</div><div class="stat-sub" id="st-extras">menjar + 8,00 € extres</div></div>
+  </div>
+
+  <div class="admin-layout">
+    <main>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+        <div class="segmented">
+          <button id="v-plat" class="active">Per plat</button>
+          <button id="v-persona">Per persona</button>
+        </div>
+        <div style="position:relative;flex:1;max-width:280px;">
+          <input id="adm-search" placeholder="Cerca plat o comensal..." style="padding-left:32px;">
+          <i data-lucide="search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--mu)"></i>
+        </div>
+      </div>
+
+      <div class="cat-pills" id="cat-pills"></div>
+      <div id="adm-list" style="margin-top:12px;"></div>
+    </main>
+
+    <aside style="display:flex;flex-direction:column;gap:16px;">
+      <div style="background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;box-shadow:var(--shadow)">
+        <h3 style="font-size:14px;margin-bottom:12px;">Configuració</h3>
+        <label style="font-size:12px;color:var(--mu);display:block;margin-bottom:4px;">Total de comensals</label>
+        <input id="cfg-guests" type="number" min="1" value="1" style="margin-bottom:10px;">
+        <label style="font-size:12px;color:var(--mu);display:block;margin-bottom:4px;">Begudes i extres / persona (€)</label>
+        <input id="cfg-extras" type="number" min="0" value="8" step="0.5">
+      </div>
+    </aside>
+  </div>
+ `;
+
+ let currentView = "plat";
+ let currentCat = "";
+ let searchQuery = "";
+ let docs = [];
+ let openDishes = new Set();
+ let openPeople = new Set();
+
+ function renderAdmin(){
+  let totalFood = 0, servingsCount = 0, dishStats = {}, peopleMap = {};
+
   docs.forEach(d=>{
-    Object.entries(d.items||{}).forEach(([i,v])=>{
+    const items = d.items||{};
+    Object.entries(items).forEach(([i,v])=>{
       if(M[i]){
-        cnt[i]=(cnt[i]||0)+v;
-        tot+=v*M[i].p;
-        if(!who[i])who[i]=[];
-        who[i].push(d.name+(v>1?` (${v})`:''));
+        servingsCount += v;
+        totalFood += v * M[i].p;
+        if(!dishStats[i]) dishStats[i] = { dish: M[i], qty: 0, people: [] };
+        dishStats[i].qty += v;
+        dishStats[i].people.push({ name: d.name, qty: v });
       }
     });
   });
-  
-  const n=+np.value||docs.length||1,b=+$("#bg").value||0;
-  $("#pp").textContent=eur(tot/n+b);$("#det").textContent=`Menjar ${eur(tot)} ÷ ${n} persones + ${eur(b)} begudes · ${docs.length} comandes rebudes`;
-  const ids=Object.keys(cnt).sort((a,b)=>a-b);
-  const cats=[...new Set(M.map(m=>m.c))],G=a=>cats.map(c=>[c,a.filter(i=>M[i].c===c)]).filter(x=>x[1].length),its=d=>Object.keys(d.items||{}).filter(i=>M[i]);
-  
-  $("#tp").innerHTML="<table>"+G(ids).map(([c,l])=>`<tr><th colspan="2" style="padding-top:18px;color:var(--ac)">${E(c)} · ${l.reduce((s,i)=>s+cnt[i],0)}</th></tr>`+l.map(i=>`<tr><td><b>${cnt[i]}×</b> ${E(M[i].n)}<div class="people-tag">👤 ${E(who[i].join(", "))}</div></td><td class="r">${eur(cnt[i]*M[i].p)}</td></tr>`).join("")).join("")+"</table>";
-  $("#tq").innerHTML="<table>"+docs.map(d=>`<tr><td><b>${E(d.name)}</b>${G(its(d)).map(([c,l])=>`<div class="s" style="margin:8px 0 0">${E(c)}</div>`+l.map(i=>`<div>${(d.items[i]>1?d.items[i]+"× ":"")+E(M[i].n)}</div>`).join("")).join("")}</td><td class="r">${eur(d.total||0)}<br><a href="?ajuda&nom=${encodeURIComponent(d.name)}">Edita</a> · <a href="#" data-del="${E(d.name)}">Esborra</a></td></tr>`).join("")+"</table>";
-  window._txt="PER PLAT\n"+G(ids).map(([c,l])=>c.toUpperCase()+"\n"+l.map(i=>`${cnt[i]}x ${M[i].n} (${who[i].join(", ")})`).join("\n")).join("\n\n")+"\n\nPER PERSONA\n"+docs.map(d=>d.name+": "+its(d).map(i=>d.items[i]+"x "+M[i].n).join("; ")).join("\n")};
- 
- np.oninput=$("#bg").oninput=draw;
- db.orderBy("name").onSnapshot(s=>{docs=s.docs.map(d=>d.data());if(!np.value)np.value=docs.length;draw()});
- $("#tq").onclick=e=>{const a=e.target.closest("[data-del]");if(!a)return;e.preventDefault();const n=a.dataset.del;if(confirm("Esborrar la comanda de "+n+"?"))db.doc(key(n)).delete()};
- $("#cp").onclick=()=>navigator.clipboard.writeText(window._txt||"").then(()=>$("#cp").textContent="Copiat ✓");
+
+  const guestsCount = +$("#cfg-guests").value || docs.length || 1;
+  const extrasCost = +$("#cfg-extras").value || 0;
+
+  $("#st-people").textContent = docs.length;
+  $("#st-guests").textContent = `de ${guestsCount} comensals`;
+  $("#st-servings").textContent = servingsCount;
+  $("#st-dishes").textContent = `${Object.keys(dishStats).length} plats diferents`;
+  $("#st-food").textContent = eur(totalFood);
+  $("#st-perperson").textContent = docs.length ? eur((totalFood / guestsCount) + extrasCost) : "—";
+  $("#st-extras").textContent = `menjar + ${eur(extrasCost)} extres`;
+
+  // Pills de categories
+  const categories = [...new Set(M.map(m=>m.c))];
+  let pillsHTML = `<button class="pill ${currentCat===''?'active':''}" data-cat="">Totes</button>`;
+  categories.forEach(c=>{
+    pillsHTML += `<button class="pill ${currentCat===c?'active':''}" data-cat="${E(c)}">${E(c)}</button>`;
+  });
+  $("#cat-pills").innerHTML = pillsHTML;
+  $("#cat-pills").style.display = currentView === "plat" ? "flex" : "none";
+
+  const qStr = nz(searchQuery);
+  const listEl = $("#adm-list");
+
+  if(currentView === "plat"){
+    let filteredDishes = Object.values(dishStats).filter(d => {
+      const matchesCat = !currentCat || d.dish.c === currentCat;
+      const matchesQuery = !qStr || nz(d.dish.n).includes(qStr) || d.people.some(p => nz(p.name).includes(qStr));
+      return matchesCat && matchesQuery;
+    });
+
+    if(!filteredDishes.length){
+      listEl.innerHTML = `<p class="s" style="text-align:center;padding:20px;">Cap coincidència trobada.</p>`;
+      return;
+    }
+
+    let h = "";
+    filteredDishes.forEach(d => {
+      const isOpen = openDishes.has(d.dish.i);
+      h += `
+        <div class="dish-card">
+          <div class="dish-head" data-toggle-dish="${d.dish.i}">
+            <div class="dish-qty">${d.qty}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:600;font-size:15px">${E(d.dish.n)}</div>
+              <div class="s" style="margin:0">${E(d.dish.c)} · ${eur(d.dish.p)}</div>
+            </div>
+            <i data-lucide="${isOpen?'chevron-up':'chevron-down'}" style="width:18px;height:18px;color:var(--mu)"></i>
+          </div>
+          ${isOpen ? `
+            <div class="dish-people">
+              ${d.people.map(p => `
+                <div class="person-row">
+                  <span>👤 ${E(p.name)}</span>
+                  <b>${p.qty > 1 ? p.qty + '×' : ''}</b>
+                </div>
+              `).join("")}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    });
+    listEl.innerHTML = h;
+
+  } else {
+    let filteredPeople = docs.filter(d => !qStr || nz(d.name).includes(qStr));
+    if(!filteredPeople.length){
+      listEl.innerHTML = `<p class="s" style="text-align:center;padding:20px;">Cap comensal trobat.</p>`;
+      return;
+    }
+
+    let h = "";
+    filteredPeople.forEach(d => {
+      const isOpen = openPeople.has(d.name);
+      const initials = d.name.split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase();
+      const items = Object.keys(d.items||{}).filter(i=>M[i]);
+
+      h += `
+        <div class="person-card">
+          <div class="person-head" data-toggle-person="${E(d.name)}">
+            <div class="avatar">${initials}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:600;font-size:15px">${E(d.name)}</div>
+              <div class="s" style="margin:0">${items.length} plats</div>
+            </div>
+            <div style="font-weight:700;margin-right:8px">${eur(d.total||0)}</div>
+            <i data-lucide="${isOpen?'chevron-up':'chevron-down'}" style="width:18px;height:18px;color:var(--mu)"></i>
+          </div>
+          ${isOpen ? `
+            <div class="dish-people">
+              ${items.map(i => `
+                <div class="person-row">
+                  <span>${d.items[i]>1?d.items[i]+'× ':''}${E(M[i].n)}</span>
+                  <span>${eur(M[i].p * d.items[i])}</span>
+                </div>
+              `).join("")}
+              <div style="display:flex;gap:8px;margin-top:10px;">
+                <a class="btn ghost sm" href="?ajuda&nom=${encodeURIComponent(d.name)}"><i data-lucide="pencil" style="width:12px;height:12px"></i> Edita</a>
+                <button class="btn danger sm" data-del-person="${E(d.name)}"><i data-lucide="trash-2" style="width:12px;height:12px"></i> Esborra</button>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    });
+    listEl.innerHTML = h;
+  }
+
+  if(window.lucide) lucide.createIcons();
+ }
+
+ $("#v-plat").onclick = () => { currentView="plat"; $("#v-plat").classList.add("active"); $("#v-persona").classList.remove("active"); renderAdmin(); };
+ $("#v-persona").onclick = () => { currentView="persona"; $("#v-persona").classList.add("active"); $("#v-plat").classList.remove("active"); renderAdmin(); };
+ $("#adm-search").oninput = (e) => { searchQuery = e.target.value; renderAdmin(); };
+ $("#cfg-guests").oninput = $("#cfg-extras").oninput = renderAdmin;
+
+ $("#cat-pills").onclick = (e) => {
+   const btn = e.target.closest(".pill");
+   if(!btn) return;
+   currentCat = btn.dataset.cat;
+   renderAdmin();
+ };
+
+ $("#adm-list").onclick = (e) => {
+   const dHead = e.target.closest("[data-toggle-dish]");
+   if(dHead){
+     const id = +dHead.dataset.toggleDish;
+     openDishes.has(id) ? openDishes.delete(id) : openDishes.add(id);
+     renderAdmin();
+     return;
+   }
+   const pHead = e.target.closest("[data-toggle-person]");
+   if(pHead){
+     const name = pHead.dataset.togglePerson;
+     openPeople.has(name) ? openPeople.delete(name) : openPeople.add(name);
+     renderAdmin();
+     return;
+   }
+   const delBtn = e.target.closest("[data-del-person]");
+   if(delBtn){
+     const name = delBtn.dataset.delPerson;
+     if(confirm("Esborrar la comanda de "+name+"?")) db.doc(key(name)).delete();
+   }
+ };
+
+ $("#btn-summary").onclick = () => {
+   let txt = "RESUM PER AL RESTAURANT\n\n";
+   let cnt = {};
+   docs.forEach(d=>Object.entries(d.items||{}).forEach(([i,v])=>{ if(M[i]) cnt[i]=(cnt[i]||0)+v; }));
+   Object.keys(cnt).forEach(i=>{ txt += `${cnt[i]}x ${M[i].n}\n`; });
+   navigator.clipboard.writeText(txt).then(()=>toast("Resum copiat al porta-retalls ✓"));
+ };
+
+ db.orderBy("name").onSnapshot(s => {
+   docs = s.docs.map(d=>d.data());
+   if(!$("#cfg-guests").value || $("#cfg-guests").value == 1) $("#cfg-guests").value = docs.length || 1;
+   renderAdmin();
+ });
 }
 
-if(ADM){$("#usr").hidden=true;$("#adm").hidden=false;$("#sub").textContent="Panell d'administració";$("#group-est").hidden=true;admin()}else user();
+if(ADM){$("#usr").hidden=true;$("#adm").hidden=false;admin()}else user();
 </script></body></html>
