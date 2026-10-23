@@ -35,7 +35,6 @@ h3{font-size:20px}
 .lnk{background:none;border:0;color:var(--ac);text-decoration:none;font:inherit;font-size:13.5px;font-weight:600;padding:6px 0;cursor:pointer}
 .lnk:hover{text-decoration:underline}
 
-/* Targeta estimació */
 .est-card{
   display:flex;align-items:center;justify-content:space-between;
   background:var(--card);border:1px solid var(--bd);border-radius:14px;
@@ -47,7 +46,6 @@ h3{font-size:20px}
 .est-amount{font-family:ui-serif,Georgia,serif;font-size:24px;font-weight:700;line-height:1.1;margin-top:2px}
 .est-sub{font-size:12px;color:var(--mu);margin-left:8px}
 
-/* Navegació de categories amb indicador visual de scroll */
 .nav-wrapper{
   position:sticky;top:0;z-index:20;margin:0 -16px;padding:8px 0;background:var(--bg);
   border-bottom:1px solid var(--bd);
@@ -64,7 +62,6 @@ h3{font-size:20px}
 }
 #nav a.active{background:var(--ac);color:var(--on);border-color:var(--ac);font-weight:600}
 
-/* Plats destacats quan estan seleccionats */
 .it{
   display:flex;align-items:center;gap:12px;padding:12px 14px;margin:6px 0;
   border:1px solid var(--bd);cursor:pointer;user-select:none;border-radius:12px;
@@ -82,15 +79,13 @@ h3{font-size:20px}
 .ck{width:26px;height:26px;flex:none;border:1.5px solid var(--bd);border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:700;color:var(--on)}
 .it.on .ck{background:var(--ac);border-color:var(--ac)}.it.on .ck::after{content:"✓"}
 
-/* Barra fixa inferior */
 #bar{
   position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;align-items:center;justify-content:space-between;
   gap:12px;padding:12px max(16px,calc((100vw - 680px)/2 + 16px)) calc(12px + env(safe-area-inset-bottom,0px));
   background:var(--card);border-top:1px solid var(--bd);box-shadow:0 -4px 20px rgba(0,0,0,0.06);
 }
-#bar .s{margin:0}.big{font-size:22px;font-weight:700;color:var(--fg);font-family:ui-serif,Georgia,serif}
+#bar .s{margin:0}.big{font-size:20px;font-weight:700;color:var(--fg);font-family:ui-serif,Georgia,serif}
 
-/* Botons */
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:6px;
   background:var(--ac);color:var(--on);border:0;border-radius:10px;padding:11px 18px;
@@ -107,7 +102,6 @@ input, select{
 }
 input:focus{border-color:var(--ac)}
 
-/* Fulls desplegables (Sheets) */
 #ov{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center}
 #ov[hidden]{display:none}
 #sh{
@@ -122,18 +116,10 @@ input:focus{border-color:var(--ac)}
 .sum{list-style:none;margin:0;padding:0}
 .sum li{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--bd);font-size:14.5px}
 .sum b{font-weight:600;white-space:nowrap}
-.tl{display:flex;justify-content:space-between;padding:14px 0 6px;font-weight:700;font-size:16px}
+.tl{display:flex;justify-content:space-between;padding:14px 0 6px;font-weight:700;font-size:15px;color:var(--mu)}
 #err{color:var(--danger);font-size:13.5px;margin-top:8px}
 .ok{width:50px;height:50px;border-radius:50%;background:var(--ac);color:var(--on);display:grid;place-items:center;font-size:24px;margin-bottom:12px}
 
-#toast{
-  position:fixed;left:50%;bottom:92px;transform:translate(-50%,10px);background:var(--fg);
-  color:var(--bg);padding:10px 18px;border-radius:999px;font-size:13.5px;font-weight:500;
-  opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90vw;text-align:center;box-shadow:0 4px 15px rgba(0,0,0,0.2);
-}
-#toast.show{opacity:1;transform:translate(-50%,0)}
-
-/* Admin Layout Responsive (sense scroll horitzontal) */
 .stats-grid{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
   gap:10px;margin:16px 0;padding:12px 0;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);
@@ -197,8 +183,8 @@ input:focus{border-color:var(--ac)}
   <div id="menu"></div>
   <div id="bar">
     <div>
-      <div class="s" id="cnt">0 plats</div>
-      <div class="big" id="tot">0,00 €</div>
+      <div class="s" id="cnt">0 plats seleccionats</div>
+      <div class="big" id="tot">Est. mitjana: —</div>
     </div>
     <button class="btn" id="go" disabled>Revisa la comanda</button>
   </div>
@@ -352,22 +338,29 @@ const P=new URLSearchParams(location.search),AJ=P.has("ajuda"),ADM=P.has("admin"
 let q={},ok="",own="",nm="",tt,cachedDocs=[];
 const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)||"";localStorage.setItem(k,v)}catch(e){return""}};
 
+function currentAverageCost(){
+  if(!cachedDocs.length) return 0;
+  const totFood = cachedDocs.reduce((acc,d)=>acc+(d.total||0),0);
+  return (totFood / cachedDocs.length) + 8;
+}
+
 function listenGroupAverage(){
   try {
     db.onSnapshot(s=>{
       cachedDocs = s.docs.map(d=>d.data());
+      const estTotal = currentAverageCost();
       if(!cachedDocs.length){
         $("#est-amount-val").textContent = "—";
         $("#est-sub-val").textContent = "0 comandes";
-        return;
+        $("#tot").textContent = "Est. mitjana: —";
+      } else {
+        $("#est-amount-val").textContent = eur(estTotal);
+        $("#est-sub-val").textContent = `${cachedDocs.length} comandes`;
+        $("#tot").textContent = `Est. mitjana: ${eur(estTotal)}`;
       }
-      const totFood=cachedDocs.reduce((acc,d)=>acc+(d.total||0),0);
-      const avgFood=totFood/cachedDocs.length;
-      const estTotal=avgFood+8;
-      $("#est-amount-val").textContent = eur(estTotal);
-      $("#est-sub-val").textContent = `${cachedDocs.length} comandes`;
     }, err=>{
       $("#est-amount-val").textContent = "—";
+      $("#tot").textContent = "Est. mitjana: —";
     });
   } catch(e){}
 }
@@ -418,12 +411,11 @@ function user(){
 }
 
 function paint(){
-  let t=0;
   document.querySelectorAll(".it").forEach(el=>el.classList.toggle("on",!!q[el.dataset.i]));
-  Object.entries(q).forEach(([i,v])=>{if(M[i])t+=v*M[i].p});
   const n=Object.keys(q).filter(i=>M[i]).length;
-  $("#cnt").textContent=n+(n==1?" plat":" plats");
-  $("#tot").textContent=eur(t);
+  $("#cnt").textContent=n+(n==1?" plat triat":" plats triats");
+  const avg = currentAverageCost();
+  $("#tot").textContent = avg ? `Est. mitjana: ${eur(avg)}` : "Est. mitjana: —";
   $("#go").disabled=!n;
   if(nm) $("#own-badge").textContent = "👤 "+nm;
 }
@@ -434,9 +426,12 @@ function sheet(h){$("#shc").innerHTML=h;$("#ov").hidden=false;document.body.clas
 function closeM(){$("#ov").hidden=true;document.body.classList.remove("lock")}
 function err(m){const x=$("#err");if(x)x.textContent=m}
 function fill(d){q={};Object.entries(d.items||{}).forEach(([k,v])=>q[k]=v)}
+
 function summary(){
   const ids=Object.keys(q).filter(i=>M[i]).sort((a,b)=>a-b);
-  return`<ul class="sum">${ids.map(i=>`<li><span>${E(M[i].n)}</span><b>${eur(M[i].p*q[i])}</b></li>`).join("")}</ul><div class="tl"><span>Total aproximat</span><span>${eur(total())}</span></div>`
+  const avg = currentAverageCost();
+  return`<ul class="sum">${ids.map(i=>`<li><span>${E(M[i].n)}</span><b>${E(M[i].c)}</b></li>`).join("")}</ul>
+  <div class="tl"><span>Estimació mitjana del grup</span><span>${avg ? eur(avg) : "—"}</span></div>`;
 }
 
 async function names(){return(await db.get()).docs.map(d=>d.data().name)}
@@ -520,16 +515,15 @@ async function recover(n){
 
 function showEstimateSheet(){
   const count = cachedDocs.length;
-  const totFood = cachedDocs.reduce((acc,d)=>acc+(d.total||0),0);
-  const avgFood = count ? totFood/count : 0;
-  const estTotal = avgFood + 8;
+  const estTotal = currentAverageCost();
+  const avgFood = count ? (cachedDocs.reduce((acc,d)=>acc+(d.total||0),0) / count) : 0;
 
   sheet(`
     <h3>Com va el sopar?</h3>
     <div style="background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin:12px 0;">
       <div class="s" style="margin:0">Estimació mitjana per persona</div>
-      <div style="font-family:ui-serif,Georgia,serif;font-size:36px;font-weight:700;color:var(--ac);margin:4px 0">${eur(estTotal)}</div>
-      <div class="s" style="margin:0">${eur(avgFood)} menjar + 8,00 € beguda/extres</div>
+      <div style="font-family:ui-serif,Georgia,serif;font-size:36px;font-weight:700;color:var(--ac);margin:4px 0">${count ? eur(estTotal) : "—"}</div>
+      <div class="s" style="margin:0">${count ? eur(avgFood) : "0,00 €"} menjar + 8,00 € beguda/extres</div>
     </div>
     <p class="s">Basat en les <b>${count} comandes</b> rebudes fins ara.</p>
     <button class="btn ghost" id="close-est">Torna a la carta</button>
@@ -537,7 +531,7 @@ function showEstimateSheet(){
   $("#close-est").onclick = closeM;
 }
 
-// ADMIN LOVABLE
+// ADMIN LOVABLE (Al panell d'administrador es continuen veient els preus per gestionar la despesa global)
 function admin(){
  document.body.classList.add("admin-mode");
  $("#main-title").textContent="Gestió del sopar";
