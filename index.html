@@ -102,7 +102,6 @@ input:focus{border-color:var(--ac)}
 }
 #toast.show{opacity:1;transform:translate(-50%,0)}
 
-/* Admin Lovable Styles */
 .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:20px 0;padding:16px 0;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd)}
 @media(min-width:600px){.stats-grid{grid-template-columns:repeat(4,1fr)}}
 .stat-card{padding-right:8px}
@@ -294,7 +293,7 @@ Crep de llimona|4.50
 Gelat de bola (vainilla, torró, xocolata...)|4.80`;
 
 const M=[];let cat;RAW.split("\n").forEach(l=>{if(l.includes("|")){const[n,p]=l.split("|");M.push({c:cat,n,p:+p,i:M.length})}else cat=l});
-const $=s=>document.querySelector(s),eur=v=>v.toFixed(2).replace(".",",")+" €",E=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]);
+const $=s=>document.querySelector(s),eur=v=>v.toFixed(2).replace(".",",")+" €",E=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const key=n=>n.trim().toLowerCase().replace(/\s+/g," ").replace(/[\/.#$\[\]]/g,""),nz=s=>key(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 const P=new URLSearchParams(location.search),AJ=P.has("ajuda"),ADM=P.has("admin");
 let q={},ok="",own="",nm="",tt;
@@ -381,7 +380,6 @@ async function recover(n){if(!n){err("Escriu el nom.");return}
    $("#err").querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>recover(L[b.dataset.r]))}
  }catch(e){err("No puc connectar amb la base de dades.")}}
 
-// LÒGICA D'ADMINISTRACIÓ ESTIL LOVABLE SENSE DEPENDÈNCIES EXTERNES
 function admin(){
  document.body.classList.add("admin-mode");
  $("#main-title").textContent="Gestió del sopar";
