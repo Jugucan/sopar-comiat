@@ -163,6 +163,11 @@ input:focus{border-color:var(--ac)}
 
 .admin-layout{display:grid;grid-template-columns:1fr;gap:16px;width:100%}
 @media(min-width:768px){.admin-layout{grid-template-columns:1fr 280px}}
+.dnote{color:var(--ac);font-size:13px;font-weight:600;margin-top:2px}
+.opts{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 6px}.opts .s{margin:0 4px 0 0}
+.opt{border:1px solid var(--bd);background:var(--card);color:var(--fg);border-radius:999px;padding:6px 12px;font:inherit;font-size:14px;cursor:pointer}
+.opt.on{background:var(--ac);border-color:var(--ac);color:var(--on)}
+.sum li.dl{display:block}.dl-h{display:flex;justify-content:space-between;gap:12px}.dn{font-size:15px;padding:10px;margin-top:2px}.dl.miss .dn{border-color:#d1473d}
 </style></head><body>
 
 <header id="main-hdr">
@@ -348,7 +353,7 @@ const M=[];let cat;RAW.split("\n").forEach(l=>{if(l.includes("|")){const[n,p]=l.
 const $=s=>document.querySelector(s),eur=v=>v.toFixed(2).replace(".",",")+" €",E=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const key=n=>n.trim().toLowerCase().replace(/\s+/g," ").replace(/[\/.#$\[\]]/g,""),nz=s=>key(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 const P=new URLSearchParams(location.search),AJ=P.has("ajuda"),ADM=P.has("admin");
-let q={},ok="",own="",nm="",tt,cachedDocs=[];
+let q={},nt={},ok="",own="",nm="",tt,cachedDocs=[];
 let currentExtrasCost = 8;
 const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)||"";localStorage.setItem(k,v)}catch(e){return""}};
 
@@ -412,7 +417,7 @@ function user(){
   $("#menu").onclick=e=>{
     const b=e.target.closest(".it");if(!b)return;
     const i=b.dataset.i;
-    q[i]?delete q[i]:q[i]=1;
+    if(q[i]){delete q[i];delete nt[i]}else q[i]=1;
     paint();
   };
 
@@ -448,13 +453,40 @@ function toast(m){const x=$("#toast");x.textContent=m;x.classList.add("show");cl
 function sheet(h){$("#shc").innerHTML=h;$("#ov").hidden=false;document.body.classList.add("lock")}
 function closeM(){$("#ov").hidden=true;document.body.classList.remove("lock")}
 function err(m){const x=$("#err");if(x)x.textContent=m}
-function fill(d){q={};Object.entries(d.items||{}).forEach(([k,v])=>q[k]=v)}
+function fill(d){q={};Object.entries(d.items||{}).forEach(([k,v])=>q[k]=v);nt={...(d.notes||{})}}
 
-function summary(){
+const OPT=[
+  {re:/entrecot|filet de vedella/i,label:"Salsa",opts:["Ceps","Pebre verd"],req:true},
+  {re:/tagliatelle/i,label:"Salsa",opts:["Carbonara","Arrabbiata","Pesto","Bolonyesa","Puttanesca"],req:true},
+  {re:/gelat/i,label:"Sabor",opts:["Vainilla","Torró","Xocolata"],req:false}
+];
+const optFor=i=>OPT.find(o=>o.re.test(M[i].n));
+const missing=i=>{const o=optFor(i);return !!(o&&o.req&&!o.opts.some(x=>(nt[i]||"").toLowerCase().includes(x.toLowerCase())))};
+function summary(editable){
   const ids=Object.keys(q).filter(i=>M[i]).sort((a,b)=>a-b);
   const avg = currentAverageCost();
-  return`<ul class="sum">${ids.map(i=>`<li><span>${E(M[i].n)}</span><b>${E(M[i].c)}</b></li>`).join("")}</ul>
+  const rows=ids.map(i=>{
+    const note=nt[i]||"",o=optFor(i);
+    if(!editable) return `<li><span>${E(M[i].n)}${note?`<div class="dnote">↳ ${E(note)}</div>`:""}</span><b>${E(M[i].c)}</b></li>`;
+    const chips=o?`<div class="opts"><span class="s">${E(o.label)}${o.req?" *":""}</span>${o.opts.map(x=>`<button type="button" class="opt" data-i="${i}" data-v="${E(x)}">${E(x)}</button>`).join("")}</div>`:"";
+    return `<li class="dl" data-i="${i}"><div class="dl-h"><span>${E(M[i].n)}</span><b>${E(M[i].c)}</b></div>${chips}<input class="dn" data-i="${i}" placeholder="Detalls del plat: punt de cocció, canvis… (opcional)" value="${E(note)}"></li>`;
+  }).join("");
+  return`<ul class="sum">${rows}</ul>
   <div class="tl"><span>Estimació mitjana del grup</span><span>${avg ? eur(avg) : "—"}</span></div>`;
+}
+function wireNotes(){
+  const sh=$("#shc"),esc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+  const strip=(t,x)=>t.replace(new RegExp(esc(x),"ig"),"").replace(/\s*,\s*,+/g,",").replace(/^[\s,]+|[\s,]+$/g,"").replace(/\s{2,}/g," ");
+  const has=(t,x)=>t.toLowerCase().includes(x.toLowerCase());
+  const sync=i=>{const inp=sh.querySelector(`.dn[data-i="${i}"]`);if(!inp)return;
+    sh.querySelectorAll(`.opt[data-i="${i}"]`).forEach(b=>b.classList.toggle("on",has(inp.value,b.dataset.v)))};
+  sh.querySelectorAll(".dn").forEach(inp=>{sync(inp.dataset.i);inp.oninput=()=>{nt[inp.dataset.i]=inp.value;sync(inp.dataset.i)}});
+  sh.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    const i=b.dataset.i,inp=sh.querySelector(`.dn[data-i="${i}"]`),o=optFor(i),x=b.dataset.v;
+    let t=inp.value;
+    if(has(t,x)) t=strip(t,x);
+    else{o.opts.forEach(y=>{t=strip(t,y)});t=t?x+", "+t:x}
+    inp.value=t;nt[i]=t;sync(i)});
 }
 
 async function names(){
@@ -485,19 +517,27 @@ function review(prefObs){
 
   sheet(`
     <h3>Revisa la teva comanda</h3>
-    ${summary()}
+    ${summary(true)}
     <label for="nm2">${AJ?"Nom de la persona":"El teu nom i cognom"}</label>
     <input id="nm2" placeholder="Nom i cognom" autocomplete="name" value="${E(nm)}">
     
-    <label for="obs2">Al·lèrgies, intoleràncies o observacions (opcional)</label>
-    <input id="obs2" placeholder="Ex: Intolerant al gluten, sense ceba..." value="${E(currentObs)}">
+    <label for="obs2">Al·lèrgies i intoleràncies (opcional)</label>
+    <input id="obs2" placeholder="Ex: celíac, sense lactosa, al·lèrgia als fruits secs…" value="${E(currentObs)}">
+    <div class="s" style="margin:6px 0 0">Només per a salut. La salsa, el punt de cocció i altres detalls s'escriuen a cada plat, més amunt.</div>
 
     <div id="err"></div>
     <button class="btn" id="ok">Confirma la comanda</button>
     <button class="btn ghost" id="bk">Torna a la carta</button>
   `);
   $("#bk").onclick=closeM;
-  $("#ok").onclick=()=>save($("#nm2").value.trim(), $("#obs2").value.trim());
+  wireNotes();
+  $("#ok").onclick=()=>{
+    const miss=Object.keys(q).filter(i=>M[i]&&missing(i));
+    document.querySelectorAll("#shc .dl").forEach(li=>li.classList.toggle("miss",miss.includes(li.dataset.i)));
+    if(miss.length){const li=document.querySelector(`#shc .dl[data-i="${miss[0]}"]`);if(li)li.scrollIntoView({block:"center",behavior:"smooth"});
+      err("Falta triar la salsa de: "+miss.map(i=>M[i].n.replace(/\s*\(.*$/,"")).join(", "));return}
+    save($("#nm2").value.trim(), $("#obs2").value.trim());
+  };
   if(!nm)$("#nm2").focus();
 }
 
@@ -514,7 +554,8 @@ async function save(n, obs=""){
     if(!ex&&ok&&k.startsWith(ok))L=[];
     if(L.length){conflict(n,L,obs);return}
   }
-  await db.doc(k).set({name:n, items:q, total:total(), obs:obs, ts:Date.now(), isConfig:false});
+  const notes={};Object.keys(q).forEach(i=>{const t=(nt[i]||"").trim();if(t&&M[i])notes[i]=t});
+  await db.doc(k).set({name:n, items:q, notes:notes, total:total(), obs:obs, ts:Date.now(), isConfig:false});
   own=k;nm=n;if(!AJ)ls("nom",n);
   done();
  }catch(e){
@@ -533,7 +574,7 @@ function conflict(n,L,obs){
 function done(){
   sheet(`<div class="ok">✓</div><h3>Comanda desada</h3><p class="s">Revisa que sigui correcta. Si vols canviar alguna cosa, pots modificar-la quan vulguis.</p>${summary()}<button class="btn" id="fin">${AJ?"Següent persona":"Fet"}</button><button class="btn ghost" id="mod">Modifica la comanda</button>`);
   $("#mod").onclick=closeM;
-  $("#fin").onclick=()=>{if(AJ){q={};nm="";own="";ok="";paint();scrollTo(0,0)}closeM()}
+  $("#fin").onclick=()=>{if(AJ){q={};nt={};nm="";own="";ok="";paint();scrollTo(0,0)}closeM()}
 }
 
 function recoverUI(){
@@ -647,7 +688,9 @@ function admin(){
         totalFood += v * M[i].p;
         if(!dishStats[i]) dishStats[i] = { dish: M[i], qty: 0, people: [] };
         dishStats[i].qty += v;
-        dishStats[i].people.push({ name: d.name, qty: v });
+        const nte=((d.notes||{})[i]||"").trim();
+        dishStats[i].people.push({ name: d.name, qty: v, note: nte });
+        if(nte){const nk=nte.toLowerCase();dishStats[i].nc=dishStats[i].nc||{};dishStats[i].nc[nk]=dishStats[i].nc[nk]||{t:nte,n:0};dishStats[i].nc[nk].n+=v}
       }
     });
   });
@@ -678,7 +721,7 @@ function admin(){
   if(currentView === "plat"){
     let filteredDishes = Object.values(dishStats).filter(d => {
       const matchesCat = !currentCat || d.dish.c === currentCat;
-      const matchesQuery = !qStr || nz(d.dish.n).includes(qStr) || d.people.some(p => nz(p.name).includes(qStr));
+      const matchesQuery = !qStr || nz(d.dish.n).includes(qStr) || d.people.some(p => nz(p.name).includes(qStr) || nz(p.note||"").includes(qStr));
       return matchesCat && matchesQuery;
     });
 
@@ -697,6 +740,7 @@ function admin(){
             <div style="flex:1;min-width:0">
               <div style="font-weight:600;font-size:15px">${E(d.dish.n)}</div>
               <div class="s" style="margin:0">${E(d.dish.c)} · ${eur(d.dish.p)}</div>
+              ${d.nc ? `<div class="dnote">${Object.values(d.nc).map(x=>x.n+"× "+E(x.t)).join(" · ")}</div>` : ""}
             </div>
             <div style="color:var(--mu);font-size:12px;">${isOpen?'▲':'▼'}</div>
           </div>
@@ -704,7 +748,7 @@ function admin(){
             <div class="dish-people">
               ${d.people.map(p => `
                 <div class="person-row">
-                  <span>👤 ${E(p.name)}</span>
+                  <span>👤 ${E(p.name)}${p.note ? `<div class="dnote">↳ ${E(p.note)}</div>` : ""}</span>
                   <b>${p.qty > 1 ? p.qty + '×' : ''}</b>
                 </div>
               `).join("")}
@@ -744,7 +788,7 @@ function admin(){
             <div class="dish-people">
               ${items.map(i => `
                 <div class="person-row">
-                  <span>${d.items[i]>1?d.items[i]+'× ':''}${E(M[i].n)}</span>
+                  <span>${d.items[i]>1?d.items[i]+'× ':''}${E(M[i].n)}${(d.notes||{})[i] ? `<div class="dnote">↳ ${E(d.notes[i])}</div>` : ''}</span>
                   <span>${eur(M[i].p * d.items[i])}</span>
                 </div>
               `).join("")}
@@ -814,6 +858,8 @@ function admin(){
    const orderDocs = docs.filter(d => !d.isConfig);
 
    orderDocs.forEach(d=>Object.entries(d.items||{}).forEach(([i,v])=>{ if(M[i]) cnt[i]=(cnt[i]||0)+v; }));
+   const notesFor={};
+   orderDocs.forEach(d=>Object.entries(d.notes||{}).forEach(([i,t])=>{ if(M[i] && t && String(t).trim()) (notesFor[i]=notesFor[i]||[]).push({name:d.name, note:String(t).trim()}); }));
    
    const categories = [...new Set(M.map(m=>m.c))];
    
@@ -824,6 +870,7 @@ function admin(){
        txt += `${c.toUpperCase()} (${totalCat})\n`;
        itemsCat.forEach(i => {
          txt += `• ${cnt[i]}x ${M[i].n}\n`;
+         (notesFor[i]||[]).forEach(x => { txt += `     ↳ ${x.name}: ${x.note}\n`; });
        });
        txt += "\n";
      }
@@ -831,7 +878,7 @@ function admin(){
 
    const obsList = orderDocs.filter(d => d.obs && d.obs.trim() !== "");
    if(obsList.length > 0){
-     txt += "⚠️ AL·LÈRGIES I OBSERVACIONS:\n";
+     txt += "⚠️ AL·LÈRGIES I INTOLERÀNCIES:\n";
      obsList.forEach(d => {
        txt += `• ${d.name}: ${d.obs.trim()}\n`;
      });
