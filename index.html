@@ -481,7 +481,7 @@ async function fetchOrder(n){
 
 function review(prefObs){
   if(!Object.keys(q).length)return;
-  const currentObs = prefObs ?? ((cachedDocs.find(d => key(d.name || "") === own) || {}).obs || "");
+  const currentObs = (typeof prefObs === "string") ? prefObs : ((cachedDocs.find(d => key(d.name || "") === own) || {}).obs || "");
 
   sheet(`
     <h3>Revisa la teva comanda</h3>
