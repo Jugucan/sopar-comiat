@@ -362,7 +362,7 @@ function currentAverageCost(){
 function listenGroupAverage(){
   try {
     db.onSnapshot(s=>{
-      cachedDocs = s.docs.map(d=>d.data());
+      cachedDocs = s.docs.map(d=>d.data()).filter(d=>d.isConfig||d.name);
       
       const configDoc = cachedDocs.find(d => d.isConfig === true);
       if(configDoc && typeof configDoc.extras === "number"){
@@ -479,9 +479,9 @@ async function fetchOrder(n){
   }catch(e){}
 }
 
-function review(){
+function review(prefObs){
   if(!Object.keys(q).length)return;
-  const currentObs = (cachedDocs.find(d => key(d.name || "") === own) || {}).obs || "";
+  const currentObs = prefObs ?? ((cachedDocs.find(d => key(d.name || "") === own) || {}).obs || "");
 
   sheet(`
     <h3>Revisa la teva comanda</h3>
@@ -527,7 +527,7 @@ function conflict(n,L,obs){
   const k=key(n),ex=L.some(x=>key(x)===k);
   sheet(`<h3>${ex?"Aquest nom ja té una comanda":"Ja hi ha un nom semblant"}</h3><p class="s">${ex?"Ja hi ha una comanda a nom de «"+E(n)+"». És teva?":"Ja hi ha comandes amb un nom semblant. Ets tu?"} Si ho ets, la comanda anterior es substituirà per aquesta.</p>`+L.map((x,i)=>`<button class="btn ghost" data-s="${i}">Sí, sóc ${E(x)}</button>`).join("")+`<button class="btn" id="no">No, sóc una altra persona</button>`);
   $("#shc").querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{own=key(L[b.dataset.s]);save(L[b.dataset.s], obs)});
-  $("#no").onclick=()=>{ok=k;nm=n;review();err("Afegeix-hi el cognom o una inicial (per exemple «"+n.split(" ")[0]+" P.») i confirma.")}
+  $("#no").onclick=()=>{ok=k;nm=n;review(obs);err("Afegeix-hi el cognom o una inicial (per exemple «"+n.split(" ")[0]+" P.») i confirma.")}
 }
 
 function done(){
@@ -765,11 +765,18 @@ function admin(){
  $("#v-persona").onclick = () => { currentView="persona"; $("#v-persona").classList.add("active"); $("#v-plat").classList.remove("active"); renderAdmin(); };
  $("#adm-search").oninput = (e) => { searchQuery = e.target.value; renderAdmin(); };
 
- $("#cfg-extras").onchange = (e) => {
-   const val = parseFloat(e.target.value) || 0;
+ let extrasTimer;
+ const saveExtras = () => {
+   const raw = String($("#cfg-extras").value).replace(",", ".").trim();
+   if (raw === "" || isNaN(parseFloat(raw))) return;
+   const val = Math.max(0, parseFloat(raw));
    currentExtrasCost = val;
-   db.doc("z_config_sopar").set({ isConfig: true, extras: val }, { merge: true });
+   db.doc("z_config_sopar").set({ isConfig: true, extras: val }, { merge: true })
+     .then(() => toast("Import desat ✓"))
+     .catch(() => toast("⚠️ No s'ha pogut desar l'import"));
  };
+ $("#cfg-extras").oninput = () => { clearTimeout(extrasTimer); extrasTimer = setTimeout(saveExtras, 600); };
+ $("#cfg-extras").onchange = saveExtras;
 
  $("#cat-pills").onclick = (e) => {
    const btn = e.target.closest(".pill");
@@ -834,7 +841,7 @@ function admin(){
  };
 
  db.onSnapshot(s => {
-   docs = s.docs.map(d=>d.data());
+   docs = s.docs.map(d=>d.data()).filter(d=>d.isConfig||d.name);
    const cfg = docs.find(d => d.isConfig);
    if(cfg && typeof cfg.extras === "number"){
      currentExtrasCost = cfg.extras;
