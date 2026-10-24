@@ -369,9 +369,11 @@ function listenGroupAverage(){
     db.onSnapshot(s=>{
       cachedDocs = s.docs.map(d=>d.data()).filter(d=>d.isConfig||d.name);
       
-      const configDoc = cachedDocs.find(d => d.isConfig === true);
-      if(configDoc && typeof configDoc.extras === "number"){
-        currentExtrasCost = configDoc.extras;
+      const cfgSnap = s.docs.find(d => d.id === "z_config_sopar");
+      const configDoc = cfgSnap ? cfgSnap.data() : null;
+      const exU = configDoc ? parseFloat(configDoc.extras) : NaN;
+      if(Number.isFinite(exU)){
+        currentExtrasCost = exU;
       }
 
       const orderDocs = cachedDocs.filter(d => !d.isConfig);
@@ -664,6 +666,7 @@ function admin(){
         <p style="font-size:12px;color:var(--mu);margin-bottom:10px;">Comensals que han demanat: <b style="color:var(--fg);" id="cfg-guests-val">0</b></p>
         <label style="font-size:12px;color:var(--mu);display:block;margin-bottom:4px;">Begudes i extres / persona (€)</label>
         <input id="cfg-extras" type="number" min="0" value="${currentExtrasCost}" step="0.5">
+        <div id="cfg-status" class="s" style="margin:6px 0 0;min-height:18px"></div>
       </div>
     </aside>
   </div>
@@ -815,9 +818,10 @@ function admin(){
    if (raw === "" || isNaN(parseFloat(raw))) return;
    const val = Math.max(0, parseFloat(raw));
    currentExtrasCost = val;
+   const st = $("#cfg-status"); if(st){ st.style.color = ""; st.textContent = "Desant…"; }
    db.doc("z_config_sopar").set({ isConfig: true, extras: val }, { merge: true })
-     .then(() => toast("Import desat ✓"))
-     .catch(() => toast("⚠️ No s'ha pogut desar l'import"));
+     .then(() => { if(st){ st.style.color = "var(--ac)"; st.textContent = "✓ Desat: " + eur(val) + " per persona"; } toast("Import desat ✓"); })
+     .catch(e => { if(st){ st.style.color = "#d1473d"; st.textContent = "⚠️ No s'ha pogut desar (" + ((e && e.code) || "error") + ")"; } toast("⚠️ No s'ha pogut desar l'import"); });
  };
  $("#cfg-extras").oninput = () => { clearTimeout(extrasTimer); extrasTimer = setTimeout(saveExtras, 600); };
  $("#cfg-extras").onchange = saveExtras;
@@ -889,9 +893,11 @@ function admin(){
 
  db.onSnapshot(s => {
    docs = s.docs.map(d=>d.data()).filter(d=>d.isConfig||d.name);
-   const cfg = docs.find(d => d.isConfig);
-   if(cfg && typeof cfg.extras === "number"){
-     currentExtrasCost = cfg.extras;
+   const cfgSnap = s.docs.find(d => d.id === "z_config_sopar");
+   const cfg = cfgSnap ? cfgSnap.data() : null;
+   const exA = cfg ? parseFloat(cfg.extras) : NaN;
+   if(Number.isFinite(exA)){
+     currentExtrasCost = exA;
      const inputExt = $("#cfg-extras");
      if(inputExt && document.activeElement !== inputExt) inputExt.value = currentExtrasCost;
    }
